@@ -1,5 +1,8 @@
 package in.lakshay.repository;
 
-public interface IApplicationRegistrationRepository {
+import in.lakshay.entity.CitizenAppRegistrationEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface IApplicationRegistrationRepository extends JpaRepository<CitizenAppRegistrationEntity, Integer>{
 
 }
