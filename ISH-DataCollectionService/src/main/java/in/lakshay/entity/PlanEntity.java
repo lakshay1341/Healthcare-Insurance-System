@@ -26,7 +26,7 @@ public class PlanEntity {
 	private String planName;
 	private LocalDate startDate;
 	private LocalDate endDate;
-	@Column(length = 30)
+	@Column(length = 50)
 	private String description;
 	private String activeSw;
 	@CreationTimestamp

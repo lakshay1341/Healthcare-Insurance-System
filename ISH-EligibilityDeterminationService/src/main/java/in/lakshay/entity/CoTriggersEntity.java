@@ -10,7 +10,7 @@ public class CoTriggersEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer triggerId;
-    private Long caseNo;
+    private Integer caseNo;
     @Lob
     private Byte[] coNoticePdf;
     @Column(length = 30)

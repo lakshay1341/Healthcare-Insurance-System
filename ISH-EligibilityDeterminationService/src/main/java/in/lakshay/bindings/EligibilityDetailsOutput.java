@@ -12,7 +12,7 @@ public class EligibilityDetailsOutput {
     private String planStatus;
     private LocalDate planStartDate;
     private LocalDate planEndDate;
-    private Double benifitAmt;
+    private Double benefitAmt;
     private String denialReason;
 
 }
