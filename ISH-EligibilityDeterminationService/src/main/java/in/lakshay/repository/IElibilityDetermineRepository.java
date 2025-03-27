@@ -1,5 +1,8 @@
 package in.lakshay.repository;
 
-public interface IElibilityDetermineRepository {
+import in.lakshay.entity.EligibilityDetailsEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface IElibilityDetermineRepository extends JpaRepository<EligibilityDetailsEntity,Integer> {
 
 }

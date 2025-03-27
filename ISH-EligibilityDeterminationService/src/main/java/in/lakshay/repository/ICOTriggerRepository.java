@@ -1,5 +1,8 @@
 package in.lakshay.repository;
 
-public interface ICOTriggerRepository {
+import in.lakshay.entity.CoTriggersEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ICOTriggerRepository extends JpaRepository<CoTriggersEntity,Integer> {
 
 }
