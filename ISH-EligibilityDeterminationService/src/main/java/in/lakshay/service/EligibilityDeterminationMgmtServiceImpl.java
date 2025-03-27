@@ -1,5 +1,11 @@
 package in.lakshay.service;
 
-public class EligibilityDeterminationMgmtServiceImpl {
+import in.lakshay.bindings.EligibilityDetailsOutput;
 
+public class EligibilityDeterminationMgmtServiceImpl implements IEligibilityDeterminationMgmtService {
+
+    @Override
+    public EligibilityDetailsOutput determineEligibility(Integer caseNo) {
+        return null;
+    }
 }
