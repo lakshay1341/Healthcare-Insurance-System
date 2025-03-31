@@ -6,10 +6,10 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-public class CorrespondenceServiceApplication {
+public class ISHCorrespondenceServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CorrespondenceServiceApplication.class, args);
+        SpringApplication.run(ISHCorrespondenceServiceApplication.class, args);
     }
 
 }
