@@ -63,11 +63,14 @@ public class EligibilityDeterminationMgmtServiceImpl implements IEligibilityDete
         Optional<CitizenAppRegistrationEntity> citizenEntityOptional = citizenRepo.findById(appId);
         int citizenAge = 0;
         String citizenName = null;
+        Long citizenSSN = 0L;
 
         if (citizenEntityOptional.isPresent()) {
             CitizenAppRegistrationEntity citizenEntity = citizenEntityOptional.get();
             LocalDate dob = citizenEntity.getDob();
             citizenAge = Period.between(dob, LocalDate.now()).getYears();
+            citizenName = citizenEntity.getFullName();
+            citizenSSN = citizenEntity.getSsn();
         }
 
         // Determine eligibility based on plan conditions
@@ -79,6 +82,8 @@ public class EligibilityDeterminationMgmtServiceImpl implements IEligibilityDete
         // Save the eligibility details entity
         EligibilityDetailsEntity eligibilityEntity = new EligibilityDetailsEntity();
         BeanUtils.copyProperties(eligibilityOutput, eligibilityEntity);
+        eligibilityEntity.setCaseNo(caseNo);
+        eligibilityEntity.setHolderSSN(citizenSSN);
         elgiRepo.save(eligibilityEntity);
 
         // Save the co-triggers entity
