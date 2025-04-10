@@ -11,7 +11,7 @@
 	<groupId>nit</groupId>
 	<artifactId>ISH-BenefitIssunaceService</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>JRTP701-BenefitIssunaceAPI</name>
+	<name>ISH-BenefitIssunaceAPI</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
