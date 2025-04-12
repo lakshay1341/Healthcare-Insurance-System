@@ -1,10 +1,10 @@
-package com.nt;
+package in.lakshay;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class Jrtp701MiniProject03UserMgmtApiApplicationTests {
+class ISHUserMgmtApiApplicationTests {
 
 	@Test
 	void contextLoads() {

@@ -42,18 +42,19 @@ public class CitizenApplicationRegistrationService implements ICitizenApplicatio
 					res -> res.bodyToMono(String.class)
 						.map(ex -> new InvalidSSNException("Invalid SSN: " + ex)))
 				.bodyToMono(String.class)
-				.block(); // We still need to block here as the service method is not reactive
+				.block(); // Using block() as the service interface is not reactive yet
 
-			// register citizen if he belongs to California state(CA)
+			// register citizen if they belong to the target state
 			if(stateName.equalsIgnoreCase(targetState)) {
 				// prepare the entity object
-				CitizenAppRegistrationEntity entity=new CitizenAppRegistrationEntity();
-				BeanUtils.copyProperties(inputs,entity);
+				CitizenAppRegistrationEntity entity = new CitizenAppRegistrationEntity();
+				entity.setStateName(stateName); // Set the state name from the API response
+				BeanUtils.copyProperties(inputs, entity);
 				// save the object
-				int appId=citizenrepo.save(entity).getAppId();
+				int appId = citizenrepo.save(entity).getAppId();
 				return appId;
 			}
-			throw new InvalidSSNException("Citizen not belongs to "+targetState+" state");
+			throw new InvalidSSNException("Citizen does not belong to " + targetState + " state");
 		} catch (InvalidSSNException e) {
 			throw e;
 		} catch (Exception e) {

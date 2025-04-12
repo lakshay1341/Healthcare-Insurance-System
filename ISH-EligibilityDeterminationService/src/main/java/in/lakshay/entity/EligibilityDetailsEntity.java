@@ -14,7 +14,7 @@ public class EligibilityDetailsEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer edTraceId;
-    private Integer caseNo;
+    private Long caseNo;
     @Column(length = 30)
     private String holderName;
     private Long holderSSN;

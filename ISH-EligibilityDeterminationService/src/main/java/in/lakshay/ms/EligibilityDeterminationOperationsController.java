@@ -18,7 +18,7 @@ public class EligibilityDeterminationOperationsController {
     private IEligibilityDeterminationMgmtService edservice;
 
     @GetMapping("/determine/{caseNo}")
-    public ResponseEntity<?> checkEligibility(@PathVariable Integer caseNo){
+    public ResponseEntity<?> checkEligibility(@PathVariable Long caseNo){
         // use service
         EligibilityDetailsOutput output=edservice.determineEligibility(caseNo);
         return new ResponseEntity<EligibilityDetailsOutput>(output, HttpStatus.CREATED);

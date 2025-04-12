@@ -40,12 +40,12 @@ public class EligibilityDeterminationMgmtServiceImpl implements IEligibilityDete
     private IEligibilityDeterminationRepository elgiRepo;
 
     @Override
-    public EligibilityDetailsOutput determineEligibility(Integer caseNo) {
+    public EligibilityDetailsOutput determineEligibility(Long caseNo) {
         Integer appId = null;
         Integer planId = null;
 
         // Retrieve planId and appId based on caseNo
-        Optional<DcCaseEntity> caseEntityOptional = caseRepo.findById(caseNo);
+        Optional<DcCaseEntity> caseEntityOptional = caseRepo.findById(caseNo.intValue());
         if (caseEntityOptional.isPresent()) {
             DcCaseEntity caseEntity = caseEntityOptional.get();
             planId = caseEntity.getPlanId();
@@ -95,12 +95,12 @@ public class EligibilityDeterminationMgmtServiceImpl implements IEligibilityDete
         return eligibilityOutput;
     }
 
-    private EligibilityDetailsOutput applyPlanConditions(Integer caseNo, String planName, int citizenAge) {
+    private EligibilityDetailsOutput applyPlanConditions(Long caseNo, String planName, int citizenAge) {
         EligibilityDetailsOutput output = new EligibilityDetailsOutput();
         output.setPlanName(planName);
 
         // Retrieve income details for the case
-        DcIncomeEntity incomeEntity = incomeRepo.findByCaseNo(caseNo);
+        DcIncomeEntity incomeEntity = incomeRepo.findByCaseNo(caseNo.intValue());
         double empIncome = incomeEntity.getEmpIncome();
         double propertyIncome = incomeEntity.getPropertyIncome();
 
@@ -117,7 +117,7 @@ public class EligibilityDeterminationMgmtServiceImpl implements IEligibilityDete
             boolean hasEligibleKids = false;
             boolean allKidsUnderLimit = true;
 
-            List<DcChildrenEntity> childrenList = childrenRepo.findByCaseNo(caseNo);
+            List<DcChildrenEntity> childrenList = childrenRepo.findByCaseNo(caseNo.intValue());
             if (!childrenList.isEmpty()) {
                 hasEligibleKids = true;
                 for (DcChildrenEntity child : childrenList) {
@@ -153,7 +153,7 @@ public class EligibilityDeterminationMgmtServiceImpl implements IEligibilityDete
                 output.setDenialReason("MEDAID rules are not satisfied");
             }
         } else if (planName.equalsIgnoreCase("CAJW")) {
-            DcEducationEntity educationEntity = educationRepo.findByCaseNo(caseNo);
+            DcEducationEntity educationEntity = educationRepo.findByCaseNo(caseNo.intValue());
             int passOutYear = educationEntity.getPassOutYear();
 
             if (empIncome == 0 && passOutYear <= LocalDate.now().getYear()) {

@@ -6,7 +6,7 @@ spring:
 #for  data source
   datasource:
     driver-class-name:  com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql:///jrtp701db
+    url: jdbc:mysql://localhost:3306/InsuranceSystemForHealth
     username: root
     password: root
 
@@ -38,9 +38,9 @@ eureka:
 
 mailbody:
    registeruser:
-        location:  src/main/java/com/nt/service/user_registration_body.txt
+        location:  src/main/java/in/lakshay/service/user_registration_body.txt
    recoverpwd:
-        location:  src/main/java/com/nt/service/recover_pwd_body.txt
+        location:  src/main/java/in/lakshay/service/recover_pwd_body.txt
 
 
 

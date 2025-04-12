@@ -14,7 +14,7 @@ import in.lakshay.exceptions.ResourceNotFoundException;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    
+
     /**
      * Handle custom application exceptions
      */
@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    
+
     /**
      * Handle resource not found exceptions
      */
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
-    
+
     /**
      * Handle illegal argument exceptions
      */
@@ -53,7 +53,20 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
-    
+
+    /**
+     * Handle file not found exceptions
+     */
+    @ExceptionHandler(java.io.FileNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleFileNotFoundException(java.io.FileNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(
+            HttpStatus.NOT_FOUND.value(),
+            ex.getMessage(),
+            System.currentTimeMillis()
+        );
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
     /**
      * Handle all other exceptions
      */

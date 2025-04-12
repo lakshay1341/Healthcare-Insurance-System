@@ -6,10 +6,10 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-public class ISHBenefitIssuanceApiApplication {
+public class ISHBenefitIssuanceServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ISHBenefitIssuanceApiApplication.class, args);
+        SpringApplication.run(ISHBenefitIssuanceServiceApplication.class, args);
     }
 
 }

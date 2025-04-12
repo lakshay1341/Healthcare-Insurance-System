@@ -8,23 +8,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import in.lakshay.service.IBenifitIssuanceMgmtService;
+import in.lakshay.service.IBenefitIssuanceMgmtService;
 
 @RestController
 @RequestMapping("/bi-api")
 public class BIOperationsRestController {
-	@Autowired
-	private  IBenifitIssuanceMgmtService  biService;
+    @Autowired
+    private IBenefitIssuanceMgmtService biService;
 
-	@GetMapping("/send")
-	public ResponseEntity<String> sendAmount() {
-		try {
-			//use service
-			JobExecution execution = biService.sendAmountToBenificries();
-			return new ResponseEntity<>(execution.getExitStatus().getExitDescription(), HttpStatus.OK);
-		} catch (Exception ex) {
-			throw new in.lakshay.exceptions.ApplicationException("Error sending benefits: " + ex.getMessage(), ex);
-		}
-	}
-
+    @GetMapping("/send")
+    public ResponseEntity<String> sendAmount() {
+        try {
+            // use service
+            JobExecution execution = biService.sendAmountToBenificries();
+            return new ResponseEntity<>(execution.getExitStatus().getExitDescription(), HttpStatus.OK);
+        } catch (Exception ex) {
+            throw new in.lakshay.exceptions.ApplicationException("Error sending benefits: " + ex.getMessage(), ex);
+        }
+    }
 }

@@ -32,6 +32,6 @@ public class EligibilityDetailsEntity {
 	private    String denialReason;
 	private   String  bankName;
 	private   Long  accountNumber;
-
+	
 
 }

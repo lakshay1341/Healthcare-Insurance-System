@@ -4,6 +4,6 @@ import in.lakshay.bindings.EligibilityDetailsOutput;
 
 public interface IEligibilityDeterminationMgmtService {
 
-    public EligibilityDetailsOutput determineEligibility(Integer caseNo);
+    public EligibilityDetailsOutput determineEligibility(Long caseNo);
 
 }
