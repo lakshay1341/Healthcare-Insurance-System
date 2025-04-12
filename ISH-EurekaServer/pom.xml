@@ -8,10 +8,10 @@
 		<version>3.3.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>nit</groupId>
-	<artifactId>EurekaServer</artifactId>
+	<groupId>in.lakshay</groupId>
+	<artifactId>ISH-EurekaServer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>EurekaServer</name>
+	<name>ISH-EurekaServer</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>

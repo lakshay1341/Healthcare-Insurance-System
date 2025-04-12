@@ -8,10 +8,10 @@
 		<version>3.3.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>nit</groupId>
+	<groupId>in.lakshay</groupId>
 	<artifactId>ISH-ConfigServer-GIT</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>JRTP701-ConfigServer-GIT</name>
+	<name>ISH-ConfigServer-GIT</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
