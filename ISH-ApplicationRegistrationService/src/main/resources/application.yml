@@ -4,15 +4,8 @@
 spring:
   application:
     name: ISH-ApplicationRegistrationService
-  datasource:
-    url: jdbc:mysql://localhost:3306/InsuranceSystemForHealth
-    username: root
-    password: root
-  jpa:
-    database-platform: org.hibernate.dialect.MySQL8Dialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+  config:
+    import: optional:configserver:http://localhost:8888
 server:
   port: 7071
 ar:

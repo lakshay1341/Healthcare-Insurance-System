@@ -8,6 +8,6 @@ import in.lakshay.entity.DcChildrenEntity;
 
 public interface IDcChildrenRepository extends JpaRepository<DcChildrenEntity, Integer>{
 
-	List<DcChildrenEntity> findByCaseNo(Integer caseNo);
+	List<DcChildrenEntity> findByCaseNo(Long caseNo);
 
 }

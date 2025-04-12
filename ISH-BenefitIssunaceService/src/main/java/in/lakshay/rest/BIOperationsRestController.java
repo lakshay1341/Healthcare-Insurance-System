@@ -15,12 +15,16 @@ import in.lakshay.service.IBenifitIssuanceMgmtService;
 public class BIOperationsRestController {
 	@Autowired
 	private  IBenifitIssuanceMgmtService  biService;
-	
+
 	@GetMapping("/send")
-	public   ResponseEntity<String>  SendAmount()throws Exception{
-		//use service
-		  JobExecution execution=biService.sendAmountToBenificries();
-		   return   new ResponseEntity<String>(execution.getExitStatus().getExitDescription(),HttpStatus.OK);
+	public ResponseEntity<String> sendAmount() {
+		try {
+			//use service
+			JobExecution execution = biService.sendAmountToBenificries();
+			return new ResponseEntity<>(execution.getExitStatus().getExitDescription(), HttpStatus.OK);
+		} catch (Exception ex) {
+			throw new in.lakshay.exceptions.ApplicationException("Error sending benefits: " + ex.getMessage(), ex);
+		}
 	}
 
 }

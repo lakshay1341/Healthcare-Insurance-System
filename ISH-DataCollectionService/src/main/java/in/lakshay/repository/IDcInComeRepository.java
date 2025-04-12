@@ -6,6 +6,6 @@ import in.lakshay.entity.DcIncomeEntity;
 
 public interface IDcInComeRepository extends JpaRepository<DcIncomeEntity, Integer>{
 
-	DcIncomeEntity findByCaseNo(Integer caseNo);
+	DcIncomeEntity findByCaseNo(Long caseNo);
 
 }

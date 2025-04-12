@@ -13,6 +13,7 @@ import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
@@ -26,12 +27,14 @@ import in.lakshay.repository.IElgibiltyDeterminationRepository;
 
 @Configuration
 public class BatchConfig {
+	@Value("${benefit.issuance.output-file:beneficiries_list.csv}")
+	private String outputFilePath;
 	@Autowired
 	private  IElgibiltyDeterminationRepository  eligiRepo;
 	@Autowired
 	private  EDDetailsProcessor   processor;
-	
-	
+
+
 	@Bean(name="reader")
 	public  RepositoryItemReader<ElgibilityDetailsEntity>  createReader(){
 		return  new  RepositoryItemReaderBuilder<ElgibilityDetailsEntity>()
@@ -41,29 +44,29 @@ public class BatchConfig {
 				                  .sorts(Map.of("caseNo",Sort.Direction.ASC))
 				                  .build();
 	}
-	
+
 	@Bean(name="writer")
 	public  FlatFileItemWriter<ElgibilityDetails>  createWriter(){
 		return  new FlatFileItemWriterBuilder<ElgibilityDetails>()
 				               .name("file-writer")
-				               .resource(new FileSystemResource("beneficiries_list.csv"))
+				               .resource(new FileSystemResource(outputFilePath))
 				               .lineSeparator("\r\n")
 				               .delimited().delimiter(",")
 				               .names("caseNo","holderName","holderSSN","planName","planStatus","benifitAmt","bankName","accountNumber")
 				               .build();
 	}
-	
+
 	//Step obj
 		@Bean(name="step1")
 		public   Step  createStep1(JobRepository jobRepository ,PlatformTransactionManager transactionManager) {
 			return  new StepBuilder("step1",jobRepository)
 					       .<ElgibilityDetailsEntity,ElgibilityDetails>chunk(3, transactionManager)
 					       .reader(createReader())
-	                       .processor(processor)	
+	                       .processor(processor)
 	                       .writer(createWriter())
 	                       .build();
 		}
-		
+
 		//Job obj
 		@Bean(name="job1")
 		public  Job  createJob(JobRepository  jobRepository , Step  step1) {

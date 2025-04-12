@@ -1,7 +1,7 @@
 server:
   port: 7076
 spring:
-  config: 
+  config:
      import: optional:configserver:http://localhost:8888
   batch:
     job:
@@ -9,9 +9,13 @@ spring:
     jdbc:
       initialize-schema: always
   application:
-    name: ISH-BIService
+    name: ISH-BenefitIssuanceService
 eureka:
    client:
       service-url:
           default-zone: http://localhost:8761/eureka
-      
+
+# Benefit issuance configuration
+benefit:
+  issuance:
+    output-file: beneficiries_list.csv

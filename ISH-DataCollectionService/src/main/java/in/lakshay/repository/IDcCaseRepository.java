@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import in.lakshay.entity.DcCaseEntity;
 
-public interface IDcCaseRepository extends JpaRepository<DcCaseEntity, Integer>{
+public interface IDcCaseRepository extends JpaRepository<DcCaseEntity, Long>{
 
 }

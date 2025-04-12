@@ -13,7 +13,7 @@ import lombok.Data;
 public class DcCaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer caseNo;
+    private Long caseNo;
     private Integer appId;
     private Integer planId;
 

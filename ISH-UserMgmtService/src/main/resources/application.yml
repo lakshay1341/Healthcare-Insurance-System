@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: ISH-UserMgmtService
+  config:
+    import: optional:configserver:http://localhost:8888
+#for  data source
+  datasource:
+    driver-class-name:  com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql:///jrtp701db
+    username: root
+    password: root
+
+ # jpa  -hibernate proeprties
+  jpa:
+     show-sql: true
+     database-platform: org.hibernate.dialect.MySQL8Dialect
+     hibernate:
+          ddl-auto: update
+  # Mail configuration moved to ConfigServer
+  mail:
+    properties:
+        mail:
+          transport:
+             protocol: smtp
+          smtp:
+              auth: true
+              starttls:
+                  enable: true
+                  required: true
+
+server:
+   port:  4041
+
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka
+
+mailbody:
+   registeruser:
+        location:  src/main/java/com/nt/service/user_registration_body.txt
+   recoverpwd:
+        location:  src/main/java/com/nt/service/recover_pwd_body.txt
+
+
+
+
+
+
+

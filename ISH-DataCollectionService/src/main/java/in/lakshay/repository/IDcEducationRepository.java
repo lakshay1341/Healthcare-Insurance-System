@@ -7,6 +7,6 @@ import in.lakshay.entity.DcEducationEntity;
 
 public interface IDcEducationRepository extends JpaRepository<DcEducationEntity, Integer>{
 
-	DcEducationEntity findByCaseNo(Integer caseNo);
+	DcEducationEntity findByCaseNo(Long caseNo);
 
 }

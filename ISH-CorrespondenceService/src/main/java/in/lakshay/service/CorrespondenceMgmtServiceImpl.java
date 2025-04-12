@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.lowagie.text.Document;
@@ -27,6 +28,8 @@ import in.lakshay.entity.CitizenAppRegistrationEntity;
 import in.lakshay.entity.CoTriggersEntity;
 import in.lakshay.entity.DcCaseEntity;
 import in.lakshay.entity.ElgibilityDetailsEntity;
+import in.lakshay.exceptions.ApplicationException;
+import in.lakshay.exceptions.ResourceNotFoundException;
 import in.lakshay.repository.IApplicationRegistrationRepository;
 import in.lakshay.repository.ICOTriggerRepository;
 import in.lakshay.repository.IDcCaseRepository;
@@ -46,6 +49,9 @@ public class CorrespondenceMgmtServiceImpl implements ICorrespondenceMgmtService
     private IApplicationRegistrationRepository citizenRepo;
     @Autowired
     private EmailUtils mailUtil;
+
+    @Value("${correspondence.pdf.output-dir:./}")
+    private String pdfOutputDir;
 
     int pendingTriggers = 0;
     int successTrigger = 0;
@@ -73,7 +79,13 @@ public class CorrespondenceMgmtServiceImpl implements ICorrespondenceMgmtService
                 try {
                     processTrigger(summary, triggerEntity);
                     successTrigger++;
+                } catch (ResourceNotFoundException e) {
+                    // Log the error and continue processing other triggers
+                    System.err.println("Resource not found: " + e.getMessage());
+                    pendingTriggers++;
                 } catch (Exception e) {
+                    // Log the error and continue processing other triggers
+                    System.err.println("Error processing trigger: " + e.getMessage());
                     e.printStackTrace();
                     pendingTriggers++;
                 }
@@ -92,17 +104,26 @@ public class CorrespondenceMgmtServiceImpl implements ICorrespondenceMgmtService
         CitizenAppRegistrationEntity citizenEntity = null;
         //  get  Elgibility details  based  on caseno
         ElgibilityDetailsEntity eligiEntity = elgiRepo.findByCaseNo(triggerEntity.getCaseNo());
+        if (eligiEntity == null) {
+            throw new ResourceNotFoundException("Eligibility details", "caseNo", triggerEntity.getCaseNo());
+        }
+
         //get   appId based  on CaseNo
         Optional<DcCaseEntity> optCaseEntity = caseRepo.findById(triggerEntity.getCaseNo());
-        if (optCaseEntity.isPresent()) {
-            DcCaseEntity caseEntity = optCaseEntity.get();
-            Integer appId = caseEntity.getAppId();
-            // get the Citizen details  based on  the appId
-            Optional<CitizenAppRegistrationEntity> optCitizenEntity = citizenRepo.findById(appId);
-            if (optCitizenEntity.isPresent()) {
-                citizenEntity = optCitizenEntity.get();
-            }
+        if (!optCaseEntity.isPresent()) {
+            throw new ResourceNotFoundException("Case", "caseNo", triggerEntity.getCaseNo());
         }
+
+        DcCaseEntity caseEntity = optCaseEntity.get();
+        Integer appId = caseEntity.getAppId();
+
+        // get the Citizen details  based on  the appId
+        Optional<CitizenAppRegistrationEntity> optCitizenEntity = citizenRepo.findById(appId);
+        if (!optCitizenEntity.isPresent()) {
+            throw new ResourceNotFoundException("Citizen", "appId", appId);
+        }
+
+        citizenEntity = optCitizenEntity.get();
         //  generate pdf doc  having   eligibility details  and  send that pdf doc  as email
 
         generatePdfAndSendMail(eligiEntity, citizenEntity);
@@ -116,7 +137,8 @@ public class CorrespondenceMgmtServiceImpl implements ICorrespondenceMgmtService
         // create Document  obj (openPdf)
         Document document = new Document(PageSize.A4);
         //  create  pdf file  to write the content  to it
-        File file = new File(eligiEntity.getCaseNo() + ".pdf");
+        String filePath = pdfOutputDir + File.separator + eligiEntity.getCaseNo() + ".pdf";
+        File file = new File(filePath);
         FileOutputStream fos = new FileOutputStream(file);
         //get  PdfWriter  to  write  to the document and response obj
         PdfWriter.getInstance(document, fos);
@@ -192,7 +214,7 @@ public class CorrespondenceMgmtServiceImpl implements ICorrespondenceMgmtService
         updateCoTrigger(eligiEntity.getCaseNo(), file);
     }
 
-    private void updateCoTrigger(Integer caseNo, File file) throws Exception {
+    private void updateCoTrigger(Long caseNo, File file) throws Exception {
         // check Trigger avaaiblity  based on the   caseNo
         CoTriggersEntity triggerEntity = triggerRepo.findByCaseNo(caseNo);
         // get  byte[]  representing  pdf doc  contentn

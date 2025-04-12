@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class ChildInputs {
 	private Integer childId;
-	private Integer caseNo;
+	private Long caseNo;
 	private LocalDate childDOB;
 	private Long childSSN;
 

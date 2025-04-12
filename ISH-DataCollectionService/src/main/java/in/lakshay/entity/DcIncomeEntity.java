@@ -11,11 +11,11 @@ import lombok.Data;
 @Table(name="DC_INCOME")
 @Data
 public class DcIncomeEntity {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer incomeId;
-	private Integer caseNo;
+	private Long caseNo;
 	private Double empIncome;
 	private Double propertyIncome;
 

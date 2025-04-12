@@ -1,21 +1,17 @@
 spring:
-  config: 
+  config:
      import: optional:configserver:http://localhost:8888
   application:
-     name: CorrespondenceAPI
+     name: ISH-CorrespondenceService
 
 
+  # Mail configuration moved to ConfigServer
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: lakshaychaudhary2003@gmail.com
-    password: dmcpenslsygkpgnw
     properties:
         mail:
           transport:
              protocol: smtp
-          smtp: 
-              port: 587
+          smtp:
               auth: true
               starttls:
                   enable: true
@@ -26,4 +22,8 @@ eureka:
    client:
       service-url:
           default-zone: http://localhost:8761/eureka
-   
+
+# Correspondence configuration
+correspondence:
+  pdf:
+    output-dir: ./pdf-notices

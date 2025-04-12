@@ -10,6 +10,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import in.lakshay.exceptions.ApplicationException;
+import in.lakshay.exceptions.ResourceNotFoundException;
+
 import in.lakshay.bindings.PlanData;
 import in.lakshay.config.AppConfigProperties;
 import in.lakshay.constants.PlanConstants;
@@ -24,10 +27,10 @@ public class AdminMgmtServiceImpl implements IAdminMgmtService {
 	private  IPlanRepository   planRepo;
 	@Autowired
 	private  IPlanCategoryRepository   planCategoryRepo;
-	
+
 	private  Map<String,String> messages;
-	
-	
+
+
 	@Autowired
 	public   AdminMgmtServiceImpl(AppConfigProperties props) {
 	 		messages=props.getMessages();
@@ -41,8 +44,8 @@ public class AdminMgmtServiceImpl implements IAdminMgmtService {
 		 //save the object
 		PlanEntity savedEntity=planRepo.save(entity);
 			return  savedEntity.getPlanId()!=null?messages.get(PlanConstants.SAVE_SUCCESS)+savedEntity.getPlanId() : messages.get(PlanConstants.SAVE_FAILURE);
-		
-	
+
+
 	}
 
 	@Override
@@ -55,8 +58,8 @@ public class AdminMgmtServiceImpl implements IAdminMgmtService {
 		});
 		return categoriesMap;
 	}
-	
-	
+
+
 
 	@Override
 	public List<PlanData> showAllPlans() {
@@ -72,7 +75,7 @@ public class AdminMgmtServiceImpl implements IAdminMgmtService {
 
 	@Override
 	public PlanData showPlanById(Integer planId) {
-		  PlanEntity entity=planRepo.findById(planId).orElseThrow(()->new IllegalArgumentException(messages.get(PlanConstants.FIND_BY_ID_FAILURE)));
+		  PlanEntity entity=planRepo.findById(planId).orElseThrow(()->new in.lakshay.exceptions.ResourceNotFoundException("Plan", "planId", planId));
 	      //convert  Entity obj  to Binding obj
 		  PlanData  data=new PlanData();
 		  BeanUtils.copyProperties(entity, data);
@@ -90,7 +93,7 @@ public class AdminMgmtServiceImpl implements IAdminMgmtService {
 			return plan.getPlanId()+messages.get(PlanConstants.UPDATE_SUCCESS);
 		}
 		else {
-			return  plan.getPlanId()+messages.get(PlanConstants.UPDATE_FAILURE);
+			throw new ResourceNotFoundException("Plan", "planId", plan.getPlanId());
 		}
 	}//method
 
@@ -103,24 +106,24 @@ public class AdminMgmtServiceImpl implements IAdminMgmtService {
 			return planId+messages.get(PlanConstants.DELETE_SUCCESS);
 		}
 		else {
-			return  planId+messages.get(PlanConstants.DELETE_FAILURE);
+			throw new ResourceNotFoundException("Plan", "planId", planId);
 		}
-		
+
 	}
 
 	@Override
 	public String changePlanStatus(Integer planId, String status) {
 		Optional<PlanEntity> optEntity=planRepo.findById(planId);
-		if(optEntity.isPresent()) {	
+		if(optEntity.isPresent()) {
 			PlanEntity entity=optEntity.get();
 			entity.setActiveSw(status);
 			planRepo.save(entity);
 			return planId+messages.get(PlanConstants.STATUS_CHANGE_SUCCESS);
 		}
 		else {
-			return planId+messages.get(PlanConstants.STATUS_CHANGE_FAILURE);
+			throw new ResourceNotFoundException("Plan", "planId", planId);
 		}
 	}
-	
-	
+
+
 }

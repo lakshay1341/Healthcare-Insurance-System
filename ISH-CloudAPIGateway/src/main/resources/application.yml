@@ -1,0 +1,44 @@
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka
+server:
+  port: 7777
+spring:
+  application:
+    name: ISH-CloudAPIGateway
+  cloud:
+    gateway:
+      routes:
+      - id: ISH-AdminService
+        predicates:
+        - Path=/plan-api/**
+        uri: http://localhost:7074/
+      - id: ISH-ApplicationRegistrationService
+        predicates:
+        - Path=/CitizenAR-api/**
+        uri: http://localhost:7071/
+      - id: ISH-BenefitIssuanceService
+        predicates:
+        - Path=/bi-api/**
+        uri: http://localhost:7076/
+      - id: ISH-CorrespondenceService
+        predicates:
+        - Path=/co-triggers-api/**
+        uri: http://localhost:7075
+      - id: ISH-DataCollectionService
+        predicates:
+        - Path=/dc-api/**
+        uri: http://localhost:7072/
+      - id: ISH-EligibilityDeterminationService
+        predicates:
+        - Path=/ed-api/**
+        uri: http://localhost:7073/
+      - id: ISH-ReportService
+        predicates:
+        - Path=/report-api/**
+        uri: http://localhost:7077/
+      - id: ISH-UserMgmtService
+        predicates:
+        - Path=/user-api/**
+        uri: http://localhost:4041/

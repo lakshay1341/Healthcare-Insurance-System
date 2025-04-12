@@ -49,7 +49,7 @@ public class DcMgmtServiceImpl implements IDcMgmtService {
     private IDcChildrenRepository childrenRepo;
 
     @Override
-    public Integer generateCaseNo(Integer appId) {
+    public Long generateCaseNo(Integer appId) {
         // Load Citizen Data
         Optional<CitizenAppRegistrationEntity> appCitizen = citizenAppRepo.findById(appId);
         if (appCitizen.isPresent()) {
@@ -57,7 +57,7 @@ public class DcMgmtServiceImpl implements IDcMgmtService {
             caseEntity.setAppId(appId);
             return caseRepo.save(caseEntity).getCaseNo(); // save operation
         }
-        return 0;
+        return 0L;
     }
 
 	@Override
@@ -69,7 +69,7 @@ public class DcMgmtServiceImpl implements IDcMgmtService {
 	}
 
 	@Override
-	public Integer savePlanSelection(PlanSelectionInputs plan) {
+	public Long savePlanSelection(PlanSelectionInputs plan) {
 		// TODO Auto-generated method stub
 		//load DcCaseEntity objects
 		Optional<DcCaseEntity> opt=caseRepo.findById(plan.getCaseNo());
@@ -80,53 +80,53 @@ public class DcMgmtServiceImpl implements IDcMgmtService {
 			caseRepo.save(caseEntity); // update obj operation
 			return caseEntity.getCaseNo();
 		}
-		return 0;
+		return 0L;
 	}
 
 	@Override
-	public Integer saveIncomeDetails(IncomeInputs income) {
+	public Long saveIncomeDetails(IncomeInputs income) {
 	    // Convert binding obj data to Entity class obj data
 	    DcIncomeEntity incomeEntity = new DcIncomeEntity();
 	    BeanUtils.copyProperties(income, incomeEntity);
-	    
+
 	    // Save the income details
 	    incomeRepo.save(incomeEntity);
-	    
+
 	    // Return caseNo
 	    return income.getCaseNo();
 	}
 
 
 	@Override
-	public Integer saveEducationDetails(EducationInputs education) {
+	public Long saveEducationDetails(EducationInputs education) {
 	    // Convert Binding object to Entity object
 	    DcEducationEntity educationEntity = new DcEducationEntity();
 	    BeanUtils.copyProperties(education, educationEntity);
-	    
+
 	    // Save the obj
 	    educationRepo.save(educationEntity);
-	    
+
 	    // Return the caseNumber
 	    return education.getCaseNo();
 	}
 
 	@Override
-	public Integer saveChildrenDetails(List<ChildInputs> children) {
+	public Long saveChildrenDetails(List<ChildInputs> children) {
 	    // Convert each Binding class obj to each Entity class obj
 	    children.forEach(child -> {
 	        DcChildrenEntity childEntity = new DcChildrenEntity();
 	        BeanUtils.copyProperties(child, childEntity);
-	        
+
 	        // Save each entity obj
 	        childrenRepo.save(childEntity);
 	    });
-	    
+
 	    // Return caseNo
 	    return children.get(0).getCaseNo();
 	}
 
 	@Override
-	public DcSummaryReport showDcSummary(Integer caseNo) {
+	public DcSummaryReport showDcSummary(Long caseNo) {
 
 	    // Get multiple entity objs based on caseNo
 	    DcIncomeEntity incomeEntity = incomeRepo.findByCaseNo(caseNo);

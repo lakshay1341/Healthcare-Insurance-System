@@ -10,17 +10,17 @@ import in.lakshay.bindings.PlanSelectionInputs;
 
 public interface IDcMgmtService {
 
-    public Integer generateCaseNo(Integer appId);
+    public Long generateCaseNo(Integer appId);
 
     public List<String> showAllPlanNames();
 
-    public Integer savePlanSelection(PlanSelectionInputs plan);
+    public Long savePlanSelection(PlanSelectionInputs plan);
 
-    public Integer saveIncomeDetails(IncomeInputs income);
+    public Long saveIncomeDetails(IncomeInputs income);
 
-    public Integer saveEducationDetails(EducationInputs education);
+    public Long saveEducationDetails(EducationInputs education);
 
-    public Integer saveChildrenDetails(List<ChildInputs> children);
+    public Long saveChildrenDetails(List<ChildInputs> children);
 
-    public DcSummaryReport showDcSummary(Integer caseNo);
+    public DcSummaryReport showDcSummary(Long caseNo);
 }
