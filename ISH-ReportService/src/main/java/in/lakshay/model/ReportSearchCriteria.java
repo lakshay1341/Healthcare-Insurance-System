@@ -7,19 +7,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Model class for report search criteria
+ * Criteria for searching reports
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReportSearchCriteria {
-    
+
     private String reportType;
     private String reportFormat;
-    private String reportStatus;
-    private String benefitType;
-    private Integer caseNumber;
-    private Integer applicationId;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private String planName;
+    private String planStatus;
+    private String stateName;
+    private Long caseNo;
+    private Integer appId;
+    private Long ssn;
+    private LocalDate fromDate;
+    private LocalDate toDate;
 }

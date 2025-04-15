@@ -24,62 +24,57 @@ import in.lakshay.processor.BeneficiaryItemProcessor;
 
 @Configuration
 public class BatchConfig {
-    
+
     @Autowired
     private DataSource dataSource;
-    
+
     @Autowired
     private JobRepository jobRepository;
-    
+
     @Autowired
     private PlatformTransactionManager transactionManager;
-    
+
     @Value("${benefit.issuance.output-file}")
     private String outputFile;
-    
+
     // Reader bean
     @Bean
     public JdbcCursorItemReader<Beneficiary> reader() {
         JdbcCursorItemReader<Beneficiary> reader = new JdbcCursorItemReader<>();
         reader.setDataSource(dataSource);
-        reader.setSql("SELECT ed.case_no as caseNo, ed.holder_name as holderName, " +
-                     "ed.holder_ssn as holderSsn, ed.plan_name as planName, " +
-                     "ed.benifit_amt as benefitAmount, ed.bank_name as bankName, " +
-                     "ed.account_number as accountNumber " +
-                     "FROM eligibility_determination ed " +
-                     "WHERE ed.plan_status = 'AP'");
+        reader.setSql("SELECT case_no as caseNo, holder_name as holderName, 0 as holderSsn, plan_name as planName, benifit_amt as benefitAmount, 'Not Provided' as bankName, 0 as accountNumber FROM eligibility_determination WHERE plan_status = 'Approved'");
         reader.setRowMapper(new BeanPropertyRowMapper<>(Beneficiary.class));
         return reader;
     }
-    
+
     // Processor bean
     @Bean
     public BeneficiaryItemProcessor processor() {
         return new BeneficiaryItemProcessor();
     }
-    
+
     // Writer bean
     @Bean
     public FlatFileItemWriter<Beneficiary> writer() {
         // Create field extractor
         BeanWrapperFieldExtractor<Beneficiary> fieldExtractor = new BeanWrapperFieldExtractor<>();
-        fieldExtractor.setNames(new String[] {"caseNo", "holderName", "holderSsn", "planName", 
+        fieldExtractor.setNames(new String[] {"caseNo", "holderName", "holderSsn", "planName",
                                              "benefitAmount", "bankName", "accountNumber"});
-        
+
         // Create line aggregator
         DelimitedLineAggregator<Beneficiary> lineAggregator = new DelimitedLineAggregator<>();
         lineAggregator.setDelimiter(",");
         lineAggregator.setFieldExtractor(fieldExtractor);
-        
+
         // Create and configure writer
         FlatFileItemWriter<Beneficiary> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(outputFile));
         writer.setLineAggregator(lineAggregator);
         writer.setHeaderCallback(writer1 -> writer1.write("Case Number,Holder Name,SSN,Plan Name,Benefit Amount,Bank Name,Account Number"));
-        
+
         return writer;
     }
-    
+
     // Step bean
     @Bean
     public Step step1() {
@@ -90,7 +85,7 @@ public class BatchConfig {
                 .writer(writer())
                 .build();
     }
-    
+
     // Job bean
     @Bean
     public Job job() {

@@ -15,10 +15,10 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name="DC_PLAN_MASTER")
+@Table(name="PLAN_MASTER")
 @Data
 public class PlanEntity {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer planId;
@@ -27,7 +27,7 @@ public class PlanEntity {
 	private LocalDate startDate;
 	private LocalDate endDate;
 	@Column(length = 50)
-	private String description;
+	private String descrption;
 	private String activeSw;
 	@CreationTimestamp
 	@Column(updatable = false)

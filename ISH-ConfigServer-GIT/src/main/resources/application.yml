@@ -10,4 +10,4 @@ spring:
         git:
           clone-on-start: true
           skipSslValidation: true
-          uri: https://github.com/laksahy1341/ISH-ConfigServer-GIT.git
+          uri: https://github.com/lakshay1341/ISH-ConfigServer-GIT
