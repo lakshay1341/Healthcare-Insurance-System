@@ -34,9 +34,9 @@ spring:
         predicates:
         - Path=/ed-api/**
         uri: http://localhost:7073/
-      - id: ISH-ReportService
+      - id: ISH-GovernmentReportService
         predicates:
-        - Path=/report-api/**
+        - Path=/report-api/government/**
         uri: http://localhost:7077/
       - id: ISH-UserMgmtService
         predicates:
