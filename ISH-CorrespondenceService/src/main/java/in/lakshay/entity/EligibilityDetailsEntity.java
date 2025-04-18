@@ -27,7 +27,7 @@ public class EligibilityDetailsEntity {
     private String planStatus;
     private LocalDate planStartDate;
     private LocalDate planEndDate;
-    private Double benifitAmt;
+    private Double benefitAmt;
     @Column(length = 30)
     private String denialReason;
 }

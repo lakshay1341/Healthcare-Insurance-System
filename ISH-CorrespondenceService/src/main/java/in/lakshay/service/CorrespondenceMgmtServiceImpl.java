@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import java.util.logging.Logger;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.Font;
@@ -27,21 +28,22 @@ import in.lakshay.binding.COSummary;
 import in.lakshay.entity.CitizenAppRegistrationEntity;
 import in.lakshay.entity.CoTriggersEntity;
 import in.lakshay.entity.DcCaseEntity;
-import in.lakshay.entity.ElgibilityDetailsEntity;
+import in.lakshay.entity.EligibilityDetailsEntity;
 import in.lakshay.exceptions.ApplicationException;
 import in.lakshay.exceptions.ResourceNotFoundException;
 import in.lakshay.repository.IApplicationRegistrationRepository;
 import in.lakshay.repository.ICOTriggerRepository;
 import in.lakshay.repository.IDcCaseRepository;
-import in.lakshay.repository.IElgibiltyDeterminationRepository;
+import in.lakshay.repository.IEligibilityDeterminationRepository;
 import in.lakshay.utils.EmailUtils;
 
 @Service
 public class CorrespondenceMgmtServiceImpl implements ICorrespondenceMgmtService {
+    private static final Logger logger = Logger.getLogger(CorrespondenceMgmtServiceImpl.class.getName());
     @Autowired
     private ICOTriggerRepository triggerRepo;
     @Autowired
-    private IElgibiltyDeterminationRepository elgiRepo;
+    private IEligibilityDeterminationRepository elgiRepo;
     @Autowired
     private IDcCaseRepository caseRepo;
 
@@ -60,10 +62,15 @@ public class CorrespondenceMgmtServiceImpl implements ICorrespondenceMgmtService
     @Override
     public COSummary processPendingTriggers() {
         CitizenAppRegistrationEntity citizenEntity = null;
-        ElgibilityDetailsEntity eligiEntity = null;
+        EligibilityDetailsEntity eligiEntity = null;
+
+        logger.info("Starting to process pending triggers");
+        logger.info("PDF output directory configured as: " + pdfOutputDir);
 
         // get all  pending  triggers
         List<CoTriggersEntity> triggersList = triggerRepo.findByTriggerStatus("pending");
+        logger.info("Found " + triggersList.size() + " pending triggers to process");
+
         //prepare  COSummary Report
         COSummary summary = new COSummary();
         summary.setTotalTriggers(triggersList.size());
@@ -77,15 +84,17 @@ public class CorrespondenceMgmtServiceImpl implements ICorrespondenceMgmtService
         for (CoTriggersEntity triggerEntity : triggersList) {
             pool.submit(() -> {
                 try {
+                    logger.info("Processing trigger for case number: " + triggerEntity.getCaseNo());
                     processTrigger(summary, triggerEntity);
                     successTrigger++;
+                    logger.info("Successfully processed trigger for case number: " + triggerEntity.getCaseNo());
                 } catch (ResourceNotFoundException e) {
                     // Log the error and continue processing other triggers
-                    System.err.println("Resource not found: " + e.getMessage());
+                    logger.warning("Resource not found: " + e.getMessage());
                     pendingTriggers++;
                 } catch (Exception e) {
                     // Log the error and continue processing other triggers
-                    System.err.println("Error processing trigger: " + e.getMessage());
+                    logger.severe("Error processing trigger: " + e.getMessage());
                     e.printStackTrace();
                     pendingTriggers++;
                 }
@@ -102,11 +111,15 @@ public class CorrespondenceMgmtServiceImpl implements ICorrespondenceMgmtService
     //helper method
     private CitizenAppRegistrationEntity processTrigger(COSummary summary, CoTriggersEntity triggerEntity) throws Exception {
         CitizenAppRegistrationEntity citizenEntity = null;
-        //  get  Elgibility details  based  on caseno
-        ElgibilityDetailsEntity eligiEntity = elgiRepo.findByCaseNo(triggerEntity.getCaseNo());
+
+        //  get  Eligibility details  based  on caseno
+        logger.info("Looking up eligibility details for case number: " + triggerEntity.getCaseNo());
+        EligibilityDetailsEntity eligiEntity = elgiRepo.findByCaseNo(triggerEntity.getCaseNo());
         if (eligiEntity == null) {
+            logger.warning("No eligibility details found for case number: " + triggerEntity.getCaseNo());
             throw new ResourceNotFoundException("Eligibility details", "caseNo", triggerEntity.getCaseNo());
         }
+        logger.info("Found eligibility details for case number: " + triggerEntity.getCaseNo());
 
         //get   appId based  on CaseNo
         Optional<DcCaseEntity> optCaseEntity = caseRepo.findById(triggerEntity.getCaseNo());
@@ -132,7 +145,18 @@ public class CorrespondenceMgmtServiceImpl implements ICorrespondenceMgmtService
     }
 
     //helper  method to generate the pdf doc
-    private void generatePdfAndSendMail(ElgibilityDetailsEntity eligiEntity, CitizenAppRegistrationEntity citizenEntity) throws Exception {
+    private void generatePdfAndSendMail(EligibilityDetailsEntity eligiEntity, CitizenAppRegistrationEntity citizenEntity) throws Exception {
+
+        // Create output directory if it doesn't exist
+        File outputDir = new File(pdfOutputDir);
+        if (!outputDir.exists()) {
+            logger.info("Creating PDF output directory: " + outputDir.getAbsolutePath());
+            boolean created = outputDir.mkdirs();
+            if (!created) {
+                logger.warning("Failed to create directory: " + outputDir.getAbsolutePath());
+            }
+        }
+        logger.info("Saving PDF to: " + pdfOutputDir);
 
         // create Document  obj (openPdf)
         Document document = new Document(PageSize.A4);
@@ -185,7 +209,7 @@ public class CorrespondenceMgmtServiceImpl implements ICorrespondenceMgmtService
         table.addCell(cell);
         cell.setPhrase(new Phrase("PlanEndDate", cellFont));
         table.addCell(cell);
-        cell.setPhrase(new Phrase("BenifitAmt", cellFont));
+        cell.setPhrase(new Phrase("BenefitAmt", cellFont));
         table.addCell(cell);
         cell.setPhrase(new Phrase("DenialReason", cellFont));
         table.addCell(cell);
@@ -199,7 +223,7 @@ public class CorrespondenceMgmtServiceImpl implements ICorrespondenceMgmtService
         table.addCell(eligiEntity.getPlanStatus());
         table.addCell(String.valueOf(eligiEntity.getPlanStartDate()));
         table.addCell(String.valueOf(eligiEntity.getPlanEndDate()));
-        table.addCell(String.valueOf(eligiEntity.getBenifitAmt()));
+        table.addCell(String.valueOf(eligiEntity.getBenefitAmt()));
         table.addCell(String.valueOf(eligiEntity.getDenialReason()));
 
         // add table  to  document
@@ -207,9 +231,18 @@ public class CorrespondenceMgmtServiceImpl implements ICorrespondenceMgmtService
         //close the document
         document.close();
         // send the generated pdf doc as the email  message
-        String subject = " Plan approval/deniel  mail ";
-        String body = "hello Mr/Miss/Mrs." + citizenEntity.getFullName() + ",  This  mail  contains  complete deatails  plan approval or deniel  ";
-        mailUtil.sendMail(citizenEntity.getEmail(), subject, body, file);
+        try {
+            String subject = "Plan approval/denial notification";
+            String body = "Hello " + citizenEntity.getFullName() + ",<br><br>This email contains complete details about your plan approval or denial.<br><br>Please see the attached PDF for details.";
+            logger.info("Attempting to send email to: " + citizenEntity.getEmail());
+            mailUtil.sendMail(citizenEntity.getEmail(), subject, body, file);
+            logger.info("Email sent successfully");
+        } catch (Exception e) {
+            // Log the error but continue processing
+            logger.severe("Failed to send email: " + e.getMessage());
+            logger.info("Continuing with trigger update despite email failure");
+        }
+
         //  update   Co_Trigger  table
         updateCoTrigger(eligiEntity.getCaseNo(), file);
     }
