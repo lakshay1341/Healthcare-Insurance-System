@@ -16,61 +16,54 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Entity representing an application report
- */
 @Entity
-@Table(name = "ISH_APPLICATION_REPORTS")
+@Table(name="WORKER_MASTER")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApplicationReportEntity {
-    
+public class WorkerMaster {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer reportId;
-    
-    @Column(length = 100, nullable = false)
-    private String reportName;
+    private Integer workerId;
     
     @Column(length = 50)
-    private String reportFormat;
+    private String name;
     
-    @Column(length = 50)
-    private String reportStatus;
+    @Column(length = 20)
+    private String password;
     
-    @Column(length = 255)
-    private String reportDescription;
-    
-    @Column(length = 255)
-    private String reportFilePath;
-    
-    private Integer appId;
-    
-    @Column(length = 100)
-    private String fullName;
-    
-    @Column(length = 100)
+    @Column(length = 50, unique = true, nullable = false)
     private String email;
     
-    @Column(length = 1)
+    private Long mobileNo;
+    
+    private Long aadharNo;
+    
+    @Column(length = 10)
     private String gender;
-    
-    private Long phoneNo;
-    
-    private Long ssn;
-    
-    @Column(length = 50)
-    private String stateName;
     
     private LocalDate dob;
     
+    @Column(length = 50)
+    private String designation;
+    
+    @Column(length = 100)
+    private String helpCenterName;
+    
+    @Column(length = 50)
+    private String helpCenterLocation;
+    
+    @Column(length = 10)
+    private String activeSw;
+    
+    // MetaData
     @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDateTime createdDate;
+    @Column(updatable = false, insertable = true)
+    private LocalDateTime createdOn;
     
     @UpdateTimestamp
-    private LocalDateTime updatedDate;
+    @Column(insertable = false, updatable = true)
+    private LocalDateTime updatedOn;
     
     @Column(length = 50)
     private String createdBy;
