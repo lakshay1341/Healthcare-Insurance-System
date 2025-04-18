@@ -1,31 +1,32 @@
 spring:
   config:
-     import: optional:configserver:http://localhost:8888
+    import: optional:configserver:http://localhost:8888
   application:
-     name: ISH-CorrespondenceService
+    name: ISH-CorrespondenceService
 
-
-  # Mail configuration
   mail:
-    host: sandbox.smtp.mailtrap.io
+    host: smtp.gmail.com
     port: 587
-    username: c71a548eca5cc6
-    password: bae1a50130ba10
+    username: lakshaychaudhary2003@gmail.com
+    password: ${MAIL_PASSWORD}
     properties:
-        mail:
-          transport:
-             protocol: smtp
-          smtp:
-              auth: true
-              starttls:
-                  enable: true
-                  required: true
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+        debug: true
+
 server:
-   port: 7075
+  port: 7075
+
 eureka:
-   client:
-      service-url:
-          defaultZone: http://localhost:8761/eureka
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
 
 # Correspondence configuration
 correspondence:
