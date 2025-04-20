@@ -10,13 +10,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkerAccount {
-    private Integer workerId; // Will not be filled during worker registration
+    private Integer workerId;
     private String name;
     private String email;
     private Long mobileNo;
     private String gender;
     private LocalDate dob;
-    private Long aadharNo;
+    private Long ssn;
     private String designation;
     private String helpCenterName;
     private String helpCenterLocation;

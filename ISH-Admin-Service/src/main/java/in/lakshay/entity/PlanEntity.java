@@ -19,8 +19,8 @@ import lombok.Data;
 @Data
 public class PlanEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private  Integer planId;
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Integer planId;
 	@Column(length = 30)
 	private  String planName;
 	private  LocalDate   startDate;

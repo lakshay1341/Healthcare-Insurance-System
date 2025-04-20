@@ -12,27 +12,25 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class EmailUtils {
+public class EmailUtils implements IEmailUtils {
 	@Autowired
-	private  JavaMailSender  mailSender;
-	
-	public   boolean sendEmailMessage(String  toMail, String subject, String body)throws Exception{
-		   boolean   mailSentStatus=false;
-		   try {
-			   MimeMessage  message=mailSender.createMimeMessage();
-			   MimeMessageHelper helper=new MimeMessageHelper(message, true);
-			   helper.setTo(toMail);
-			   helper.setSentDate(new Date());
-			   helper.setSubject(subject);
-			   helper.setText(body,true);
-			   mailSender.send(message);
-			   mailSentStatus=true;
-		   }
-		   catch(Exception  e) {
-			 log.error(e.getMessage());
-			   throw e;
-		   }
-		   return  mailSentStatus;
-	}
+	private JavaMailSender mailSender;
 
+	@Override
+	public boolean sendEmailMessage(String toMail, String subject, String body) {
+		boolean mailSentStatus = false;
+		try {
+			MimeMessage message = mailSender.createMimeMessage();
+			MimeMessageHelper helper = new MimeMessageHelper(message, true);
+			helper.setTo(toMail);
+			helper.setSentDate(new Date());
+			helper.setSubject(subject);
+			helper.setText(body, true);
+			mailSender.send(message);
+			mailSentStatus = true;
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		}
+		return mailSentStatus;
+	}
 }

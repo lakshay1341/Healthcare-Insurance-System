@@ -29,12 +29,12 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("/report-api/government")
 @Tag(name = "Government Report Controller", description = "API for government report operations")
 public class GovernmentReportController {
-    
+
     private static final Logger logger = Logger.getLogger(GovernmentReportController.class.getName());
 
     @Autowired
     private GovernmentReportService reportService;
-    
+
     /**
      * Generate a government report
      */
@@ -45,7 +45,7 @@ public class GovernmentReportController {
         GovernmentReportResponse response = reportService.generateReport(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-    
+
     /**
      * Get all reports
      */
@@ -56,7 +56,7 @@ public class GovernmentReportController {
         List<GovernmentReportResponse> reports = reportService.getAllReports();
         return new ResponseEntity<>(reports, HttpStatus.OK);
     }
-    
+
     /**
      * Get report by ID
      */
@@ -67,7 +67,7 @@ public class GovernmentReportController {
         GovernmentReportResponse report = reportService.getReportById(reportId);
         return new ResponseEntity<>(report, HttpStatus.OK);
     }
-    
+
     /**
      * Get reports by type
      */
@@ -78,7 +78,7 @@ public class GovernmentReportController {
         List<GovernmentReportResponse> reports = reportService.getReportsByType(reportType);
         return new ResponseEntity<>(reports, HttpStatus.OK);
     }
-    
+
     /**
      * Get reports by department
      */
@@ -89,7 +89,7 @@ public class GovernmentReportController {
         List<GovernmentReportResponse> reports = reportService.getReportsByDepartment(departmentName);
         return new ResponseEntity<>(reports, HttpStatus.OK);
     }
-    
+
     /**
      * Get reports by period
      */
@@ -100,7 +100,7 @@ public class GovernmentReportController {
         List<GovernmentReportResponse> reports = reportService.getReportsByPeriod(periodCovered);
         return new ResponseEntity<>(reports, HttpStatus.OK);
     }
-    
+
     /**
      * Download report
      */
@@ -110,7 +110,7 @@ public class GovernmentReportController {
         logger.info("Received request to download government report with ID: " + reportId);
         reportService.downloadReport(reportId, response);
     }
-    
+
     /**
      * Delete report
      */

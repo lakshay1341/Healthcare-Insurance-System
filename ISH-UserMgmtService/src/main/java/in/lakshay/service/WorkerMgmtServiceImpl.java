@@ -17,20 +17,20 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Example;
+// Security imports removed
 import org.springframework.stereotype.Service;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
-    
+
     @Autowired
     private IWorkerMasterRepository workerMasterRepo;
-    
+
     @Autowired
     private EmailUtils emailUtils;
-    
+
     @Autowired
     private Environment env;
 
@@ -39,65 +39,78 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
         // Convert WorkerAccount obj data to WorkerMaster obj (Entity obj) data
         WorkerMaster master = new WorkerMaster();
         BeanUtils.copyProperties(worker, master);
-        
+
         // Set random string of 6 chars as password
         String tempPwd = generateRandomPassword(6);
+        // Store password directly without encoding
         master.setPassword(tempPwd);
         master.setActiveSw("InActive");
-        
+
         // Save object
         WorkerMaster savedMaster = workerMasterRepo.save(master);
-        
-        // Send email with temporary password
-        String subject = "Worker Registration Success";
-        String body = readEmailMessageBody(env.getProperty("mailbody.registeruser.location"), worker.getName(), tempPwd);
-        emailUtils.sendEmailMessage(worker.getEmail(), subject, body);
-        
+
+        try {
+            // Send email with temporary password
+            log.debug("Loading email template from: {}", env.getProperty("mailbody.registerworker.location"));
+            String subject = "Worker Registration Success";
+            String body = readEmailMessageBody(env.getProperty("mailbody.registerworker.location"), worker.getName(), tempPwd);
+            log.debug("Email body loaded successfully");
+            emailUtils.sendEmailMessage(worker.getEmail(), subject, body);
+            log.debug("Email sent successfully");
+        } catch (Exception e) {
+            log.error("Error sending registration email: " + e.getMessage(), e);
+            // Continue with registration even if email fails
+        }
+
         // Return message
-        return savedMaster.getWorkerId() != null ? 
-               "Worker is registered with Id value:: " + savedMaster.getWorkerId() + " - check mail for temp password" : 
+        return savedMaster.getWorkerId() != null ?
+               "Worker is registered with Id value:: " + savedMaster.getWorkerId() + " - check mail for temp password" :
                "Problem in worker registration";
     }
 
     @Override
     public String activateWorkerAccount(ActivateWorker worker) {
-        // Use findBy method
-        WorkerMaster entity = workerMasterRepo.findByEmailAndPassword(worker.getEmail(), worker.getTempPassword());
-        
+        // Since passwords are now encoded, we need to find the worker by email only
+        WorkerMaster entity = workerMasterRepo.findByEmail(worker.getEmail());
+
         if (entity == null) {
             return "Worker is not found for activation";
-        } else {
-            // Set the password
-            entity.setPassword(worker.getConfirmPassword());
-            // Change the worker account status to active
-            entity.setActiveSw("Active");
-            // Update the obj
-            workerMasterRepo.save(entity);
-            return "Worker is activated with new Password";
         }
+
+        // Verify if the temporary password matches
+        if (!worker.getTempPassword().equals(entity.getPassword())) {
+            return "Invalid temporary password";
+        }
+
+        // Set the new password (without encoding)
+        entity.setPassword(worker.getConfirmPassword());
+        // Change the worker account status to active
+        entity.setActiveSw("Active");
+        // Update the obj
+        workerMasterRepo.save(entity);
+        return "Worker is activated with new Password";
     }
 
     @Override
     public String login(WorkerCredentials credentials) {
-        // Convert WorkerCredentials obj to WorkerMaster obj (Entity obj)
-        WorkerMaster master = new WorkerMaster();
-        master.setEmail(credentials.getEmail());
-        master.setPassword(credentials.getPassword());
-        
-        // Prepare Example obj
-        Example<WorkerMaster> example = Example.of(master);
-        List<WorkerMaster> listEntities = workerMasterRepo.findAll(example);
-        
-        if (listEntities.isEmpty()) {
-            return "Invalid Credentials";
+        // Find worker by email
+        WorkerMaster entity = workerMasterRepo.findByEmail(credentials.getEmail());
+
+        // Check if worker exists
+        if (entity == null) {
+            return "Invalid credentials";
+        }
+
+        // Check if password matches
+        if (!credentials.getPassword().equals(entity.getPassword())) {
+            return "Invalid credentials";
+        }
+
+        // Check if account is active
+        if (entity.getActiveSw().equalsIgnoreCase("Active")) {
+            return "Valid credentials and Login successful";
         } else {
-            // Get entity obj
-            WorkerMaster entity = listEntities.get(0);
-            if (entity.getActiveSw().equalsIgnoreCase("Active")) {
-                return "Valid credentials and Login successful";
-            } else {
-                return "Worker Account is not active";
-            }
+            return "Worker Account is not active";
         }
     }
 
@@ -116,12 +129,12 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
         // Load the worker by worker id
         Optional<WorkerMaster> opt = workerMasterRepo.findById(id);
         WorkerAccount account = null;
-        
+
         if (opt.isPresent()) {
             account = new WorkerAccount();
             BeanUtils.copyProperties(opt.get(), account);
         }
-        
+
         return account;
     }
 
@@ -130,12 +143,12 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
         // Use the custom findBy(-) method
         WorkerMaster master = workerMasterRepo.findByNameAndEmail(name, email);
         WorkerAccount account = null;
-        
+
         if (master != null) {
             account = new WorkerAccount();
             BeanUtils.copyProperties(master, account);
         }
-        
+
         return account;
     }
 
@@ -143,7 +156,7 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
     public String updateWorker(WorkerAccount worker) {
         // Use the findById method
         Optional<WorkerMaster> opt = workerMasterRepo.findById(worker.getWorkerId());
-        
+
         if (opt.isPresent()) {
             // Get Entity object
             WorkerMaster master = opt.get();
@@ -159,12 +172,12 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
     public String deleteWorkerById(Integer id) {
         // Load the obj
         Optional<WorkerMaster> opt = workerMasterRepo.findById(id);
-        
+
         if (opt.isPresent()) {
             workerMasterRepo.deleteById(id);
             return "Worker is deleted";
         }
-        
+
         return "Worker is not found for deletion";
     }
 
@@ -172,7 +185,7 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
     public String changeWorkerStatus(Integer id, String status) {
         // Load the obj
         Optional<WorkerMaster> opt = workerMasterRepo.findById(id);
-        
+
         if (opt.isPresent()) {
             // Get Entity obj
             WorkerMaster master = opt.get();
@@ -182,7 +195,7 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
             workerMasterRepo.save(master);
             return "Worker status changed";
         }
-        
+
         return "Worker not found for changing the status";
     }
 
@@ -190,7 +203,7 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
     public String recoverPassword(String name, String email) throws Exception {
         // Get WorkerMaster (Entity obj) by name, email
         WorkerMaster master = workerMasterRepo.findByNameAndEmail(name, email);
-        
+
         if (master != null) {
             String pwd = master.getPassword();
             // Send the recovered password to the email account
@@ -199,17 +212,17 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
             emailUtils.sendEmailMessage(email, subject, mailBody);
             return pwd + " mail is sent having the recovered password";
         }
-        
+
         return "Worker name and email is not found";
     }
-    
+
     // Helper methods for same class
     private String generateRandomPassword(int length) {
         // A list of characters to choose from in form of a string
         String alphaNumericStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvxyz0123456789";
         // Creating a StringBuffer size of AlphaNumericStr
         StringBuilder randomWord = new StringBuilder(length);
-        
+
         for (int i = 0; i < length; i++) {
             // Generating a random number using SecureRandom
             SecureRandom random = new SecureRandom();
@@ -218,35 +231,49 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
             // Adding Random character one by one at the end of randomWord
             randomWord.append(alphaNumericStr.charAt(ch));
         }
-        
+
         return randomWord.toString();
     }
-    
-    private String readEmailMessageBody(String fileName, String fullName, String pwd) throws Exception {
+
+    private String readEmailMessageBody(String resourcePath, String fullName, String pwd) throws Exception {
         String mailBody = null;
         String url = "http://localhost:4041/worker/activate";
-        
-        try (FileReader reader = new FileReader(fileName);
-             BufferedReader br = new BufferedReader(reader)) {
-            // Read file content to StringBuilder object line by line
-            StringBuilder buffer = new StringBuilder();
-            String line = null;
-            
-            do {
-                line = br.readLine();
-                if (line != null)
+
+        log.debug("Reading email template from path: {}", resourcePath);
+        try {
+            // Use Spring's ResourceLoader to load the file from classpath
+            String actualPath = resourcePath.replace("classpath:", "");
+            log.debug("Actual resource path after removing 'classpath:': {}", actualPath);
+
+            org.springframework.core.io.Resource resource =
+                new org.springframework.core.io.ClassPathResource(actualPath);
+
+            log.debug("Resource exists: {}", resource.exists());
+            log.debug("Resource description: {}", resource.getDescription());
+
+            // Read the resource content
+            try (java.io.InputStream is = resource.getInputStream();
+                 java.io.BufferedReader br = new java.io.BufferedReader(new java.io.InputStreamReader(is))) {
+
+                StringBuilder buffer = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
                     buffer.append(line);
-            } while (line != null);
-            
-            mailBody = buffer.toString();
-            mailBody = mailBody.replace("{FULL-NAME}", fullName);
-            mailBody = mailBody.replace("{PWD}", pwd);
-            mailBody = mailBody.replace("{URL}", url);
+                }
+
+                mailBody = buffer.toString();
+                log.debug("Email template content loaded, length: {}", mailBody.length());
+
+                mailBody = mailBody.replace("{FULL-NAME}", fullName);
+                mailBody = mailBody.replace("{PWD}", pwd);
+                mailBody = mailBody.replace("{URL}", url);
+                log.debug("Email template placeholders replaced successfully");
+            }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error reading email template: " + e.getMessage(), e);
             throw e;
         }
-        
+
         return mailBody;
     }
 }
