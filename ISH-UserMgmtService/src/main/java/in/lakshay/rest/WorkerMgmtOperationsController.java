@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -26,10 +25,10 @@ import java.util.List;
 @RequestMapping("/worker-api")
 @Slf4j
 public class WorkerMgmtOperationsController {
-    
+
     @Autowired
     private IWorkerMgmtService workerService;
-    
+
     @PostMapping("/save")
     public ResponseEntity<String> saveWorker(@RequestBody WorkerAccount account) {
         try {
@@ -37,10 +36,14 @@ public class WorkerMgmtOperationsController {
             return new ResponseEntity<>(resultMsg, HttpStatus.CREATED);
         } catch (Exception e) {
             log.error(e.getMessage());
+            // Check for duplicate email constraint violation
+            if (e.getMessage() != null && e.getMessage().contains("Duplicate entry") && e.getMessage().contains("email")) {
+                return new ResponseEntity<>("Email address already exists. Please use a different email.", HttpStatus.BAD_REQUEST);
+            }
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     @PostMapping("/activate")
     public ResponseEntity<String> activateWorker(@RequestBody ActivateWorker worker) {
         try {
@@ -51,7 +54,7 @@ public class WorkerMgmtOperationsController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     @PostMapping("/login")
     public ResponseEntity<String> performLogin(@RequestBody WorkerCredentials credentials) {
         try {
@@ -62,7 +65,7 @@ public class WorkerMgmtOperationsController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     @GetMapping("/report")
     public ResponseEntity<Object> showWorkers() {
         try {
@@ -73,7 +76,7 @@ public class WorkerMgmtOperationsController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     @GetMapping("/find/{id}")
     public ResponseEntity<Object> showWorkerById(@PathVariable Integer id) {
         try {
@@ -84,7 +87,7 @@ public class WorkerMgmtOperationsController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     @GetMapping("/find/{email}/{name}")
     public ResponseEntity<Object> showWorkerByEmailAndName(@PathVariable String email, @PathVariable String name) {
         try {
@@ -95,7 +98,7 @@ public class WorkerMgmtOperationsController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     @PutMapping("/update")
     public ResponseEntity<String> updateWorkerDetails(@RequestBody WorkerAccount account) {
         try {
@@ -106,7 +109,7 @@ public class WorkerMgmtOperationsController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteWorkerById(@PathVariable Integer id) {
         try {
@@ -117,7 +120,7 @@ public class WorkerMgmtOperationsController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     @PatchMapping("/changeStatus/{id}/{status}")
     public ResponseEntity<String> changeStatus(@PathVariable Integer id, @PathVariable String status) {
         try {
@@ -128,7 +131,7 @@ public class WorkerMgmtOperationsController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     @GetMapping("/recover-password/{name}/{email}")
     public ResponseEntity<String> recoverPassword(@PathVariable String name, @PathVariable String email) {
         try {

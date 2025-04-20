@@ -35,7 +35,7 @@ public class CitizenAppRegistrationEntity {
     private String gender;
     private Long phoneNo;
     private Long ssn;
-    @Column(length = 30)
+    @Column(length = 255)
     private String stateName;
     private LocalDate dob;
     @Column(length = 30)

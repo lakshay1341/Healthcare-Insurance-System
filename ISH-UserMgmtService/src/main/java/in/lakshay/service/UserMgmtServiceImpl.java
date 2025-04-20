@@ -16,14 +16,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Example;
+// Security imports removed
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 
 import in.lakshay.bindigs.ActivateUser;
 import in.lakshay.bindigs.LoginCredentials;
-
-import lombok.extern.slf4j.Slf4j;
-
 
 @Service
 @Slf4j
@@ -33,27 +32,36 @@ public class UserMgmtServiceImpl implements IUserMgmtService {
 	@Autowired
 	private EmailUtils emailUtils;
 	@Autowired
-	private  Environment  env;
-	
-
+	private Environment env;
 
 	@Override
-	public String registerUser(UserAccount user)throws Exception {
-		  // convert   UserAccount  obj data  to  UserMaster obj(Entity obj) data
-		   UserMaster master=new UserMaster();
-		   BeanUtils.copyProperties(user, master);
-		  //set    random  string  of  6 chars  as   password
-		   String  tempPwd=generateRandomPassword(6);
-		   master.setPassword(tempPwd);
-		   master.setActiveSw("InActive");
-		   //save  object
-		   UserMaster savedMaster=userMasterRepo.save(master);
-		   //perform  send the  mail  Operation    
-		      String subject =" User Registration Success";
-		      String  body=readEmailMEssageBody(env.getProperty("mailbody.registeruser.location"),user.getName(),tempPwd);
-		      emailUtils.sendEmailMessage(user.getEmail(), subject, body);
-		   //return  message
-		return savedMaster.getUserId()!=null?"User is registered with Id value:: "+savedMaster.getUserId()+"check mail for temp password" : "Problem is  user registration";
+	public String registerUser(UserAccount user) throws Exception {
+		// convert UserAccount obj data to UserMaster obj(Entity obj) data
+		UserMaster master = new UserMaster();
+		BeanUtils.copyProperties(user, master);
+		//set random string of 6 chars as password
+		String tempPwd = generateRandomPassword(6);
+		// Store password directly without encoding
+		master.setPassword(tempPwd);
+		master.setActiveSw("InActive");
+		//save object
+		UserMaster savedMaster = userMasterRepo.save(master);
+
+		try {
+			//perform send the mail Operation
+			log.debug("Loading email template from: {}", env.getProperty("mailbody.registeruser.location"));
+			String subject = "User Registration Success";
+			String body = readEmailMEssageBody(env.getProperty("mailbody.registeruser.location"), user.getName(), tempPwd);
+			log.debug("Email body loaded successfully");
+			emailUtils.sendEmailMessage(user.getEmail(), subject, body);
+			log.debug("Email sent successfully");
+		} catch (Exception e) {
+			log.error("Error sending registration email: " + e.getMessage(), e);
+			// Continue with registration even if email fails
+		}
+
+		//return message
+		return savedMaster.getUserId() != null ? "User is registered with Id value:: " + savedMaster.getUserId() + " - check mail for temp password" : "Problem in user registration";
 	}
 
 /*	@Override
@@ -62,11 +70,11 @@ public class UserMgmtServiceImpl implements IUserMgmtService {
 		UserMaster  master=new UserMaster();
 		 master.setEmail(user.getEmail());
 		master.setPassword(user.getTempPassword());
-		//  check the  record available by using email and  temp password 
+		//  check the  record available by using email and  temp password
 		  Example<UserMaster>  example=Example.of(master);
 		  //select  * from  JRTP_USER_MASTER WHERE mail=? and passsword=?
 		List<UserMaster> list=userMasterRepo.findAll(example);
-		
+
 		// if  valid  email and  temp is given    the set enduser supplied real password to update the record
 		if(list.size()!=0) {
 			//get Entity object
@@ -79,50 +87,53 @@ public class UserMgmtServiceImpl implements IUserMgmtService {
 			UserMaster  updatedEntity=userMasterRepo.save(entity);
 			return  "User  is  activated  with new  Password";
 		}
-		
+
 		return "User is not found for activation";
 	}*/
-	
+
 	@Override
 	public String activateUserAccount(ActivateUser user) {
-        //use  findBy method	
-		UserMaster entity=userMasterRepo.findByEmailAndPassword(user.getEmail(), user.getTempPassword());
-		
-		if(entity==null) {
+        // Since passwords are now encoded, we need to find the user by email only
+		UserMaster entity = userMasterRepo.findByEmail(user.getEmail());
+
+		if(entity == null) {
 			return "User is not found for activation";
 		}
-		else {
-			//set the password
-			entity.setPassword(user.getConfirmPassword());
-			// change the user account status to active
-			entity.setActiveSw("Active");
-			//update the obj
-			userMasterRepo.save(entity);
-			return  "User  is  activated  with new  Password";
+
+		// Verify if the temporary password matches
+		if (!user.getTempPassword().equals(entity.getPassword())) {
+			return "Invalid temporary password";
 		}
-	
+
+		// Set the new password (without encoding)
+		entity.setPassword(user.getConfirmPassword());
+		// Change the user account status to active
+		entity.setActiveSw("Active");
+		// Update the object
+		userMasterRepo.save(entity);
+		return "User is activated with new Password";
 	}
-	
+
 	@Override
 	public String login(LoginCredentials credentials) {
-		//convert  LoginCredentials obj  to   USerMaster obj (Entity  obj)
-		UserMaster master=new UserMaster();
-		BeanUtils.copyProperties(credentials, master);
-		//prepare Example obj
-		Example<UserMaster>  example=Example.of(master);
-		List<UserMaster>  listEntities=userMasterRepo.findAll(example);
-		if(listEntities.isEmpty()) {
-			return " Invalid Credentails";
+		// Find user by email
+		UserMaster entity = userMasterRepo.findByEmail(credentials.getEmail());
+
+		// Check if user exists
+		if (entity == null) {
+			return "Invalid credentials";
 		}
-		else {
-			//get entity obj
-			UserMaster  entity=listEntities.get(0);
-			if(entity.getActiveSw().equalsIgnoreCase("Active")) {
-				 return "  Valid  credentials  and  Login  successful";
-			}
-			else {
-				return  "  User Account is not  active";
-			}
+
+		// Check if password matches
+		if (!credentials.getPassword().equals(entity.getPassword())) {
+			return "Invalid credentials";
+		}
+
+		// Check if account is active
+		if (entity.getActiveSw().equalsIgnoreCase("Active")) {
+			return "Valid credentials and Login successful";
+		} else {
+			return "User Account is not active";
 		}
 	}
 
@@ -133,10 +144,10 @@ public class UserMgmtServiceImpl implements IUserMgmtService {
 			  UserAccount user=new UserAccount();
 			  BeanUtils.copyProperties(entity, user);
 			  return user;
-		}).toList(); 
+		}).toList();
 
-  
-		
+
+
 //Load  all entities  and convert to UserAccount obj
 		// convert all entities to   UserAccount objs
   /*List<UserMaster>  listEntities=userMasterRepo.findAll();
@@ -218,11 +229,11 @@ public class UserMgmtServiceImpl implements IUserMgmtService {
 
 	@Override
 	public String recoverPassword(RecoverPassword recover)throws Exception {
-		//get   UserMaster (Entity obj)  by name, email  
+		//get   UserMaster (Entity obj)  by name, email
 		UserMaster   master=userMasterRepo.findByNameAndEmail(recover.getName(), recover.getEmail());
 		if(master!=null) {
 			String  pwd=master.getPassword();
-			 //send the recovered password  to the email account 
+			 //send the recovered password  to the email account
 			String  subject="  mail for  password recovery";
 			String  mailBody=readEmailMEssageBody(env.getProperty("mailbody.recoverpwd.location"), recover.getName(), pwd);  //private method
 			emailUtils.sendEmailMessage(recover.getEmail(), subject, mailBody);
@@ -230,8 +241,8 @@ public class UserMgmtServiceImpl implements IUserMgmtService {
 		}
 		return "User and  email  is not found";
 	}
-	
-	
+
+
 	//helper methods  for same class
 	private  String generateRandomPassword(int length)
 	 {
@@ -250,35 +261,49 @@ public class UserMgmtServiceImpl implements IUserMgmtService {
 	  }
 	    return randomWord.toString();
 	 }//methid
-	
-	private   String  readEmailMEssageBody(String fileName, String fullName,String pwd)throws Exception  {
-		String  mailBody=null;
-		String  url="http://localhost:4041/activate";
-		try( FileReader  reader=new  FileReader(fileName);
-				 BufferedReader  br=new BufferedReader(reader)){
-			//read  file content   to  StringBuffer object line by line
-			 StringBuilder  buffer=new StringBuilder();
-			  String line=null;
-			 do {
-				line=br.readLine();
-				  if(line!=null)
-				    buffer.append(line);
-			 }while(line!=null);
-			
-			 mailBody=buffer.toString();
-			 mailBody=mailBody.replace("{FULL-NAME}", fullName);
-			 mailBody=mailBody.replace("{PWD}", pwd);
-			 mailBody=mailBody.replace("{URL}", url);
-			
-		}//try
-		catch(Exception e) {
-			log.error(e.getMessage());
+
+	private String readEmailMEssageBody(String resourcePath, String fullName, String pwd) throws Exception {
+		String mailBody = null;
+		String url = "http://localhost:4041/activate";
+
+		log.debug("Reading email template from path: {}", resourcePath);
+		try {
+			// Use Spring's ResourceLoader to load the file from classpath
+			String actualPath = resourcePath.replace("classpath:", "");
+			log.debug("Actual resource path after removing 'classpath:': {}", actualPath);
+
+			org.springframework.core.io.Resource resource =
+				new org.springframework.core.io.ClassPathResource(actualPath);
+
+			log.debug("Resource exists: {}", resource.exists());
+			log.debug("Resource description: {}", resource.getDescription());
+
+			// Read the resource content
+			try (java.io.InputStream is = resource.getInputStream();
+				 java.io.BufferedReader br = new java.io.BufferedReader(new java.io.InputStreamReader(is))) {
+
+				StringBuilder buffer = new StringBuilder();
+				String line;
+				while ((line = br.readLine()) != null) {
+					buffer.append(line);
+				}
+
+				mailBody = buffer.toString();
+				log.debug("Email template content loaded, length: {}", mailBody.length());
+
+				mailBody = mailBody.replace("{FULL-NAME}", fullName);
+				mailBody = mailBody.replace("{PWD}", pwd);
+				mailBody = mailBody.replace("{URL}", url);
+				log.debug("Email template placeholders replaced successfully");
+			}
+		} catch (Exception e) {
+			log.error("Error reading email template: " + e.getMessage(), e);
 			throw e;
 		}
-		return   mailBody; 
-		
+
+		return mailBody;
 	}
-	
+
 
 
 }

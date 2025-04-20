@@ -14,10 +14,10 @@ import in.lakshay.service.ICitizenApplicationRegistrationService;
 @RestController
 @RequestMapping("/CitizenAR-api")
 public class CitizenApplicationRegistrationOperationController {
-	
+
 	@Autowired
 	private ICitizenApplicationRegistrationService registrationService;
-	
+
 	@PostMapping("/save")
 	public ResponseEntity<String> saveCitizenApplication(@RequestBody CitizenAppRegistrationInputs inputs) throws Exception{
 			int appId=registrationService.registerCitizenApplication(inputs);

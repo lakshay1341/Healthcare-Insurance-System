@@ -23,21 +23,21 @@ import in.lakshay.service.IAdminMgmtService;
 public class AdminOperationsController {
 	@Autowired
 	private   IAdminMgmtService   planService;
-	
+
 	@GetMapping("/categories")
 	public   ResponseEntity<Map<Integer,String>>   showPlanCategories(){
 		//invoke  service  class methods
 			Map<Integer,String> mapCategories=planService.getPlanCategories();
 			return  new ResponseEntity<Map<Integer,String>>(mapCategories, HttpStatus.OK);
 	}
-	
+
 	@PostMapping("/register")
 	public   ResponseEntity<String>   savePlan(@RequestBody PlanData plan){
 		//use service
 			String  msg=planService.registerPlan(plan);
 			return  new ResponseEntity<String>(msg,HttpStatus.CREATED);
 		}
-	
+
 	@GetMapping("/all")
 	public  ResponseEntity<List<PlanData>>   getAllPlans(){
 		//use  service
@@ -45,29 +45,29 @@ public class AdminOperationsController {
 			return  new ResponseEntity<List<PlanData>>(list,HttpStatus.OK);
 	}
 
-	
+
 	@GetMapping("/find/{planId}")
 	public    ResponseEntity<PlanData>  getTravelPlanById(@PathVariable Integer planId){
 		//use  service
 			 PlanData  plan=planService.showPlanById(planId);
 			 return  new ResponseEntity<PlanData>(plan,HttpStatus.OK);
 	}
-	
+
 	@PutMapping("/update")
 	public    ResponseEntity<String>    updatePlan(@RequestBody PlanData plan){
 		//use service
 			String msg=planService.updatePlan(plan);
 			return  new ResponseEntity<String>(msg,HttpStatus.OK);
-		
+
 	}
-	
+
 	@DeleteMapping("/delete/{planId}")
 	public   ResponseEntity<String>   removePlanByPlanId(@PathVariable Integer planId){
 		 //use service
 			String msg=planService.deletePlan(planId);
 			return  new ResponseEntity<String>(msg,HttpStatus.OK);
 	}
-	
+
 	@PutMapping("/status-change/{planId}/{status}")
 	public   ResponseEntity<String>   changeStatusByPlanId(@PathVariable Integer planId,
 			                                                                                                  @PathVariable String  status){
@@ -75,7 +75,7 @@ public class AdminOperationsController {
 			String msg=planService.changePlanStatus(planId, status);
 			return  new ResponseEntity<String>(msg,HttpStatus.OK);
 	}
-	
+
 /*	@ExceptionHandler(IllegalArgumentException.class)
 	public  ResponseEntity<ExceptionInfo>   handleIAE(IllegalArgumentException iae){
 	    ExceptionInfo  info=new ExceptionInfo();
@@ -83,5 +83,5 @@ public class AdminOperationsController {
 	    info.setCode(3000);
 	    return  new ResponseEntity<ExceptionInfo>(info,HttpStatus.INTERNAL_SERVER_ERROR);
 	}*/
-	
+
 }//class

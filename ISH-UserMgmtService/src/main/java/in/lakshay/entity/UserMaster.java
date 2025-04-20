@@ -32,13 +32,13 @@ public class UserMaster {
 	@Column(length = 30,unique = true,nullable = false)
 	private  String  email;
 	private  Long  mobileNo;
-	private   Long  aadharNo;
+	private   Long  ssn;
 	@Column(length = 10)
 	private  String gender;
 	private  LocalDate  dob;
 	@Column(length = 10)
 	private  String    activeSw;
-	
+
 	//MetaData
 	@CreationTimestamp
 	@Column(updatable = false,insertable = true)
@@ -50,7 +50,7 @@ public class UserMaster {
 	private  String createBy;
 	@Column(length = 20)
 	private   String  updatedBy;
-	
-	
+
+
 
 }

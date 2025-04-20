@@ -12,6 +12,8 @@ public class CitizenAppRegistrationInputs {
 	private Long phoneNo;
 	private Long ssn;
 	private LocalDate dob;
-
-
+	private String stateName;
+	private String remark;
+	private String createdBy;
+	private String updatedBy;
 }

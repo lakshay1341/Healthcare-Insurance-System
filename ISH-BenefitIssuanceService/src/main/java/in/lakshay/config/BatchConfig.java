@@ -42,7 +42,7 @@ public class BatchConfig {
     public JdbcCursorItemReader<Beneficiary> reader() {
         JdbcCursorItemReader<Beneficiary> reader = new JdbcCursorItemReader<>();
         reader.setDataSource(dataSource);
-        reader.setSql("SELECT case_no as caseNo, holder_name as holderName, 0 as holderSsn, plan_name as planName, benifit_amt as benefitAmount, 'Not Provided' as bankName, 0 as accountNumber FROM eligibility_determination WHERE plan_status = 'Approved'");
+        reader.setSql("SELECT case_no as caseNo, holder_name as holderName, holderssn as holderSsn, plan_name as planName, benifit_amt as benefitAmount, COALESCE(bank_name, 'Not Provided') as bankName, COALESCE(account_number, 0) as accountNumber FROM eligibility_determination WHERE plan_status = 'Approved'");
         reader.setRowMapper(new BeanPropertyRowMapper<>(Beneficiary.class));
         return reader;
     }
