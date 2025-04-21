@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/worker-api")
@@ -55,14 +57,51 @@ public class WorkerMgmtOperationsController {
         }
     }
 
+    @Autowired
+    private in.lakshay.security.JwtUtil jwtUtil;
+
+    @Autowired
+    private in.lakshay.repository.IWorkerMasterRepository workerRepository;
+
     @PostMapping("/login")
-    public ResponseEntity<String> performLogin(@RequestBody WorkerCredentials credentials) {
+    public ResponseEntity<?> performLogin(@RequestBody WorkerCredentials credentials) {
         try {
             String resultMsg = workerService.login(credentials);
-            return new ResponseEntity<>(resultMsg, HttpStatus.OK);
+
+            // If login is successful, generate JWT token
+            if (resultMsg.contains("Valid credentials")) {
+                // Get worker details
+                in.lakshay.entity.WorkerMaster worker = workerRepository.findByEmail(credentials.getEmail());
+
+                // Generate JWT token
+                String token = jwtUtil.generateToken(credentials.getEmail(), "ROLE_WORKER");
+
+                // Create response
+                Map<String, Object> response = new HashMap<>();
+                response.put("token", token);
+                response.put("tokenType", "Bearer");
+                response.put("email", credentials.getEmail());
+                response.put("name", worker.getName());
+                response.put("type", "WORKER");
+                response.put("message", "Login successful");
+
+                log.info("JWT token generated for worker: {}", credentials.getEmail());
+                return ResponseEntity.ok(response);
+            } else {
+                // Login failed
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("status", HttpStatus.UNAUTHORIZED.value());
+                errorResponse.put("error", "Unauthorized");
+                errorResponse.put("message", resultMsg);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            }
         } catch (Exception e) {
             log.error(e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            errorResponse.put("error", "Internal Server Error");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 

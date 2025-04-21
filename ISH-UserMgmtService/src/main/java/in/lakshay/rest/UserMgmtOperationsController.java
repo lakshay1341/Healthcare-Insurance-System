@@ -1,7 +1,9 @@
 //Rest controller
 package in.lakshay.rest;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import in.lakshay.bindigs.ActivateUser;
 import in.lakshay.bindigs.LoginCredentials;
@@ -61,16 +63,52 @@ public class UserMgmtOperationsController {
 		}
 	}
 
+	@Autowired
+	private in.lakshay.security.JwtUtil jwtUtil;
+
+	@Autowired
+	private in.lakshay.repository.IUserMasterRepository userRepository;
+
 	@PostMapping("/login")
-	public   ResponseEntity<String>   performLogin(@RequestBody LoginCredentials credentials){
+	public ResponseEntity<?> performLogin(@RequestBody LoginCredentials credentials) {
 		try {
-			//use service
-			String resultMsg=userService.login(credentials);
-			return  new ResponseEntity<>(resultMsg,HttpStatus.OK);
-		}
-		catch(Exception e) {
+			// Use service
+			String resultMsg = userService.login(credentials);
+
+			// If login is successful, generate JWT token
+			if (resultMsg.contains("Valid credentials")) {
+				// Get user details
+				in.lakshay.entity.UserMaster user = userRepository.findByEmail(credentials.getEmail());
+
+				// Generate JWT token
+				String token = jwtUtil.generateToken(credentials.getEmail(), "ROLE_USER");
+
+				// Create response
+				Map<String, Object> response = new HashMap<>();
+				response.put("token", token);
+				response.put("tokenType", "Bearer");
+				response.put("email", credentials.getEmail());
+				response.put("name", user.getName());
+				response.put("type", "USER");
+				response.put("message", "Login successful");
+
+				log.info("JWT token generated for user: {}", credentials.getEmail());
+				return ResponseEntity.ok(response);
+			} else {
+				// Login failed
+				Map<String, Object> errorResponse = new HashMap<>();
+				errorResponse.put("status", HttpStatus.UNAUTHORIZED.value());
+				errorResponse.put("error", "Unauthorized");
+				errorResponse.put("message", resultMsg);
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+			}
+		} catch (Exception e) {
 			log.error(e.getMessage());
-			return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+			Map<String, Object> errorResponse = new HashMap<>();
+			errorResponse.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+			errorResponse.put("error", "Internal Server Error");
+			errorResponse.put("message", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
 		}
 	}
 

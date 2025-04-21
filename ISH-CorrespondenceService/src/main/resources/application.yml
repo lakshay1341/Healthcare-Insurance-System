@@ -8,7 +8,9 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: lakshaychaudhary2003@gmail.com
-    password: ${MAIL_PASSWORD}
+    # For development, use a default password
+    # For production, set the MAIL_PASSWORD environment variable
+    password: ${MAIL_PASSWORD:kdvirgldcxfmnwiv}
     properties:
       mail:
         transport:

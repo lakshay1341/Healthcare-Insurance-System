@@ -10,19 +10,28 @@ spring:
       initialize-schema: always
   application:
     name: ISH-BenefitIssuanceService
-  
+
   # Data Source configuration
   datasource:
     url: jdbc:mysql://localhost:3306/InsuranceSystemForHealth
     username: root
     password: root
+    hikari:
+      connection-timeout: 5000  # 5 seconds
+      maximum-pool-size: 10
+      minimum-idle: 2
+      initialization-fail-timeout: 0  # Fail immediately if cannot connect
 
   # JPA configuration
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none  # Changed from update to none to speed up startup
     show-sql: true
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false  # Speeds up startup
 
 # Eureka client configuration
 eureka:

@@ -3,6 +3,13 @@ spring:
     name: ISH-UserMgmtService
   config:
     import: optional:configserver:http://localhost:8888
+  main:
+    allow-bean-definition-overriding: true
+  # Security configuration
+  security:
+    user:
+      name: admin
+      password: admin
 #for  data source
   datasource:
     driver-class-name:  com.mysql.cj.jdbc.Driver
@@ -16,17 +23,24 @@ spring:
      database-platform: org.hibernate.dialect.MySQL8Dialect
      hibernate:
           ddl-auto: update
-  # Mail configuration moved to ConfigServer
+  # Mail configuration
   mail:
+    host: smtp.gmail.com
+    port: 587
+    username: lakshaychaudhary2003@gmail.com
+    # For development, use a default password
+    # For production, set the MAIL_PASSWORD environment variable
+    password: ${MAIL_PASSWORD:kdvirgldcxfmnwiv}
     properties:
-        mail:
-          transport:
-             protocol: smtp
-          smtp:
-              auth: true
-              starttls:
-                  enable: true
-                  required: true
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+        debug: true
 
 server:
    port:  4041
@@ -38,13 +52,35 @@ eureka:
 
 mailbody:
    registeruser:
-        location:  src/main/java/in/lakshay/service/user_registration_body.txt
+        location:  classpath:in/lakshay/service/user_registration_body.txt
+   registerworker:
+        location:  classpath:in/lakshay/service/worker_registration_body.txt
    recoverpwd:
-        location:  src/main/java/in/lakshay/service/recover_pwd_body.txt
+        location:  classpath:in/lakshay/service/recover_pwd_body.txt
 
+# JWT Configuration
+jwt:
+  secret: defaultSecretKeyWhichShouldBeAtLeast256BitsLongForHS256Algorithm
+  expiration: 604800000  # 7 days in milliseconds
+  header: Authorization
+  prefix: Bearer
+  issuer: ish-health-system
+  audience: ish-services
 
+# Security Configuration
 
-
-
-
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    in.lakshay: DEBUG
+    org.springframework.web: DEBUG
+    # Security logging removed
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+  file:
+    name: logs/user-mgmt-service.log
+    max-size: 10MB
+    max-history: 10
 
