@@ -84,7 +84,7 @@ Access the API Gateway at: http://localhost:7777
 
 ### Postman Collection
 
-[Click here to download the Postman Collection](INSERT_LINK_HERE)
+[Click here to download the Postman Collection](https://github.com/lakshay1341/Healthcare-Insurance-System/blob/main/ISH-Postman-collections/ISH%20-%20Insurance%20Service%20Hub.postman_collection.json)
 
 The collection includes a comprehensive set of API requests to test the normal flow a user might experience when interacting with the ISH application.
 
