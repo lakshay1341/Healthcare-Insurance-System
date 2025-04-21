@@ -1,0 +1,699 @@
+{
+	"info": {
+		"_postman_id": "007a70db-6baf-4a0b-a9b0-90bd64365c51",
+		"name": "ISH - Insurance Service Hub",
+		"description": "A comprehensive collection for testing the Insurance Service Hub (ISH) application flow.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40686830"
+	},
+	"item": [
+		{
+			"name": "1. User Management",
+			"item": [
+				{
+					"name": "1.1 Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"johndoe@example.com\",\n  \"mobileNo\": \"1234567890\",\n  \"gender\": \"Male\",\n  \"dob\": \"1990-01-01\",\n  \"ssn\": 123456789\n}"
+						},
+						"url": {
+							"raw": "http://localhost:7777/user-api/save",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"user-api",
+								"save"
+							]
+						},
+						"description": "Register a new user in the system. The response will include a user ID and a message to check email for temporary password."
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Activate User Account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"johndoe@example.com\",\n  \"tempPassword\": \"{{temp_password}}\",\n  \"newPassword\": \"SecurePass123\",\n  \"confirmPassword\": \"SecurePass123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:7777/user-api/activate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"user-api",
+								"activate"
+							]
+						},
+						"description": "Activate a user account using the temporary password received via email. Replace {{temp_password}} with the actual temporary password."
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 User Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Store user ID if available in the response",
+									"var responseBody = pm.response.json();",
+									"if (responseBody && responseBody.userId) {",
+									"    pm.environment.set(\"user_id\", responseBody.userId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"johndoe@example.com\",\n  \"password\": \"SecurePass123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:7777/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with user credentials. This endpoint will authenticate the user and return user information."
+					},
+					"response": []
+				},
+				{
+					"name": "1.4 Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7777/user-api/find/johndoe@example.com/John Doe",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"user-api",
+								"find",
+								"johndoe@example.com",
+								"John Doe"
+							]
+						},
+						"description": "Get user profile information by email and name."
+					},
+					"response": []
+				}
+			],
+			"description": "User registration, activation, and authentication endpoints"
+		},
+		{
+			"name": "2. Worker Management",
+			"item": [
+				{
+					"name": "2.1 Register Worker",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"janesmith@example.com\",\n  \"mobileNo\": \"9876543210\",\n  \"gender\": \"Female\",\n  \"dob\": \"1985-05-05\",\n  \"ssn\": 987654321,\n  \"designation\": \"Case Worker\",\n  \"helpCenterName\": \"Downtown Help Center\",\n  \"helpCenterLocation\": \"Main Street\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:7777/worker-api/save",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"worker-api",
+								"save"
+							]
+						},
+						"description": "Register a new worker (case worker) in the system. The response will include a worker ID and a message to check email for temporary password."
+					},
+					"response": []
+				},
+				{
+					"name": "2.2 Activate Worker Account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"janesmith@example.com\",\n  \"tempPassword\": \"{{worker_temp_password}}\",\n  \"newPassword\": \"SecurePass123\",\n  \"confirmPassword\": \"SecurePass123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:7777/worker-api/activate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"worker-api",
+								"activate"
+							]
+						},
+						"description": "Activate a worker account using the temporary password received via email. Replace {{worker_temp_password}} with the actual temporary password."
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 Worker Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Store worker ID if available in the response",
+									"var responseBody = pm.response.json();",
+									"if (responseBody && responseBody.workerId) {",
+									"    pm.environment.set(\"worker_id\", responseBody.workerId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"janesmith@example.com\",\n  \"password\": \"SecurePass123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:7777/worker-api/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"worker-api",
+								"login"
+							]
+						},
+						"description": "Login with worker credentials. This endpoint will authenticate the worker and return worker information."
+					},
+					"response": []
+				}
+			],
+			"description": "Worker (case worker) registration, activation, and authentication endpoints"
+		},
+		{
+			"name": "3. Application Registration",
+			"item": [
+				{
+					"name": "3.1 Register Citizen Application",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Extract application ID from response",
+									"var responseText = pm.response.text();",
+									"var match = responseText.match(/id::(\\d+)/);",
+									"if (match && match[1]) {",
+									"    pm.environment.set(\"application_id\", match[1]);",
+									"    console.log(\"Application ID set to: \" + match[1]);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"johndoe@example.com\",\n  \"phoneNo\": \"1234567890\",\n  \"gender\": \"Male\",\n  \"ssn\": 123456789,\n  \"dob\": \"1990-01-01\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:7777/CitizenAR-api/save",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"CitizenAR-api",
+								"save"
+							]
+						},
+						"description": "Register a new citizen application for health insurance. The response will include an application ID."
+					},
+					"response": []
+				}
+			],
+			"description": "Citizen application registration for health insurance"
+		},
+		{
+			"name": "4. Data Collection",
+			"item": [
+				{
+					"name": "4.1 Generate Case Number",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Extract case number from response",
+									"var responseText = pm.response.text();",
+									"var match = responseText.match(/number::(\\d+)/);",
+									"if (match && match[1]) {",
+									"    pm.environment.set(\"case_number\", match[1]);",
+									"    console.log(\"Case Number set to: \" + match[1]);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7777/dc-api/loadCaseNo/{{application_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"dc-api",
+								"loadCaseNo",
+								"{{application_id}}"
+							]
+						},
+						"description": "Generate a case number for the application. Replace {{application_id}} with the actual application ID."
+					},
+					"response": []
+				},
+				{
+					"name": "4.2 Get Plan Names",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7777/dc-api/planNames",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"dc-api",
+								"planNames"
+							]
+						},
+						"description": "Get all available plan names."
+					},
+					"response": []
+				},
+				{
+					"name": "4.3 Update Plan Selection",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"caseNo\": \"{{case_number}}\",\n  \"planId\": 1\n}"
+						},
+						"url": {
+							"raw": "http://localhost:7777/dc-api/updatePlanSelection",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"dc-api",
+								"updatePlanSelection"
+							]
+						},
+						"description": "Update plan selection for the case. Replace {{case_number}} with the actual case number."
+					},
+					"response": []
+				},
+				{
+					"name": "4.4 Save Income Details",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"caseNo\": \"{{case_number}}\",\n  \"empIncome\": 200,\n  \"rentIncome\": 12000,\n  \"propertyIncome\": 5000\n}"
+						},
+						"url": {
+							"raw": "http://localhost:7777/dc-api/saveIncome",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"dc-api",
+								"saveIncome"
+							]
+						},
+						"description": "Save income details for the case. Replace {{case_number}} with the actual case number."
+					},
+					"response": []
+				},
+				{
+					"name": "4.5 Save Education Details",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"caseNo\": \"{{case_number}}\",\n  \"highestDegree\": \"Bachelor's\",\n  \"graduationYear\": 2015,\n  \"universityName\": \"State University\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:7777/dc-api/saveEducation",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"dc-api",
+								"saveEducation"
+							]
+						},
+						"description": "Save education details for the case. Replace {{case_number}} with the actual case number."
+					},
+					"response": []
+				},
+				{
+					"name": "4.6 Save Children Details",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"caseNo\": \"{{case_number}}\",\n  \"childrenCount\": 2,\n  \"childrenAges\": \"5,8\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:7777/dc-api/saveChilds",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"dc-api",
+								"saveChilds"
+							]
+						},
+						"description": "Save children details for the case. Replace {{case_number}} with the actual case number."
+					},
+					"response": []
+				}
+			],
+			"description": "Collection of applicant data including income, education, and dependents"
+		},
+		{
+			"name": "5. Eligibility Determination",
+			"item": [
+				{
+					"name": "5.1 Determine Eligibility",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7777/ed-api/determine/{{case_number}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"ed-api",
+								"determine",
+								"{{case_number}}"
+							]
+						},
+						"description": "Determine eligibility for the case. Replace {{case_number}} with the actual case number."
+					},
+					"response": []
+				}
+			],
+			"description": "Determine eligibility for health insurance based on collected data"
+		},
+		{
+			"name": "6. Benefit Issuance",
+			"item": [
+				{
+					"name": "6.1 Send Benefits",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7777/bi-api/send",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"bi-api",
+								"send"
+							]
+						},
+						"description": "Send benefits to eligible beneficiaries."
+					},
+					"response": []
+				}
+			],
+			"description": "Manage the issuance of benefits to eligible applicants"
+		},
+		{
+			"name": "7. Correspondence",
+			"item": [
+				{
+					"name": "7.1 Process Correspondence Triggers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7777/co-triggers-api/process",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"co-triggers-api",
+								"process"
+							]
+						},
+						"description": "Process correspondence triggers to send notifications to applicants."
+					},
+					"response": []
+				}
+			],
+			"description": "Handle communication with applicants"
+		},
+		{
+			"name": "8. Admin Operations",
+			"item": [
+				{
+					"name": "8.1 Get Plan Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7777/plan-api/categories",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"plan-api",
+								"categories"
+							]
+						},
+						"description": "Get all plan categories."
+					},
+					"response": []
+				},
+				{
+					"name": "8.2 Register Plan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"planName\": \"SNAP\",\n  \"planCategory\": 1,\n  \"startDate\": \"2023-01-01\",\n  \"endDate\": \"2023-12-31\",\n  \"descrption\": \"Supplemental Nutrition Assistance Program\",\n  \"activeSw\": \"Y\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:7777/plan-api/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"plan-api",
+								"register"
+							]
+						},
+						"description": "Register a new health insurance plan."
+					},
+					"response": []
+				}
+			],
+			"description": "Administrative functions for managing plans and system configuration"
+		},
+		{
+			"name": "9. Government Reports",
+			"item": [
+				{
+					"name": "9.1 Get Government Reports",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"reportType\": \"comprehensive\",\r\n  \"reportFormat\": \"PDF\",\r\n  \"periodCovered\": \"Jan 2025 - Mar 2025\",\r\n  \"departmentName\": \"Health and Family Welfare\",\r\n  \"generatedFor\": \"Central Government\",\r\n  \"includeCharts\": true,\r\n  \"includeStatistics\": true,\r\n  \"includeBreakdownByState\": true,\r\n  \"includeBreakdownByPlan\": true,\r\n  \"includeBreakdownByAge\": true,\r\n  \"includeBreakdownByIncome\": true\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:7777/report-api/government/generate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"report-api",
+								"government",
+								"generate"
+							]
+						},
+						"description": "Get reports for government agencies."
+					},
+					"response": []
+				}
+			],
+			"description": "Generate reports for government agencies"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:7777",
+			"type": "string"
+		}
+	]
+}
