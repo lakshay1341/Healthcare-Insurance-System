@@ -179,7 +179,3 @@ A comprehensive test script is provided to test all endpoints:
 ```
 
 Additionally, a Postman collection is available for manual testing of all endpoints.
-
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
