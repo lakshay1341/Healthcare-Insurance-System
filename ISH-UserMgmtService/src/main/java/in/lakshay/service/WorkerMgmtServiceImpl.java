@@ -17,7 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Example;
-// Security imports removed
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,6 +34,9 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
     @Autowired
     private Environment env;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public String registerWorker(WorkerAccount worker) throws Exception {
         // Convert WorkerAccount obj data to WorkerMaster obj (Entity obj) data
@@ -42,8 +45,8 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
 
         // Set random string of 6 chars as password
         String tempPwd = generateRandomPassword(6);
-        // Store password directly without encoding
-        master.setPassword(tempPwd);
+        // Store password with BCrypt encoding
+        master.setPassword(passwordEncoder.encode(tempPwd));
         master.setActiveSw("InActive");
 
         // Save object
@@ -70,20 +73,20 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
 
     @Override
     public String activateWorkerAccount(ActivateWorker worker) {
-        // Since passwords are now encoded, we need to find the worker by email only
+        // Find the worker by email
         WorkerMaster entity = workerMasterRepo.findByEmail(worker.getEmail());
 
         if (entity == null) {
             return "Worker is not found for activation";
         }
 
-        // Verify if the temporary password matches
-        if (!worker.getTempPassword().equals(entity.getPassword())) {
-            return "Invalid temporary password";
+        // Check if account is already active
+        if ("Active".equals(entity.getActiveSw())) {
+            return "Worker account is already active";
         }
 
-        // Set the new password (without encoding)
-        entity.setPassword(worker.getConfirmPassword());
+        // Set the new password with BCrypt encoding
+        entity.setPassword(passwordEncoder.encode(worker.getConfirmPassword()));
         // Change the worker account status to active
         entity.setActiveSw("Active");
         // Update the obj
@@ -101,8 +104,8 @@ public class WorkerMgmtServiceImpl implements IWorkerMgmtService {
             return "Invalid credentials";
         }
 
-        // Check if password matches
-        if (!credentials.getPassword().equals(entity.getPassword())) {
+        // Check if password matches using BCrypt
+        if (!passwordEncoder.matches(credentials.getPassword(), entity.getPassword())) {
             return "Invalid credentials";
         }
 

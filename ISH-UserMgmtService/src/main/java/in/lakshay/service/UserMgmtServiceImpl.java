@@ -16,7 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Example;
-// Security imports removed
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,6 +33,8 @@ public class UserMgmtServiceImpl implements IUserMgmtService {
 	private EmailUtils emailUtils;
 	@Autowired
 	private Environment env;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@Override
 	public String registerUser(UserAccount user) throws Exception {
@@ -41,8 +43,8 @@ public class UserMgmtServiceImpl implements IUserMgmtService {
 		BeanUtils.copyProperties(user, master);
 		//set random string of 6 chars as password
 		String tempPwd = generateRandomPassword(6);
-		// Store password directly without encoding
-		master.setPassword(tempPwd);
+		// Store password with BCrypt encoding
+		master.setPassword(passwordEncoder.encode(tempPwd));
 		master.setActiveSw("InActive");
 		//save object
 		UserMaster savedMaster = userMasterRepo.save(master);
@@ -93,20 +95,20 @@ public class UserMgmtServiceImpl implements IUserMgmtService {
 
 	@Override
 	public String activateUserAccount(ActivateUser user) {
-        // Since passwords are now encoded, we need to find the user by email only
+        // Find the user by email
 		UserMaster entity = userMasterRepo.findByEmail(user.getEmail());
 
 		if(entity == null) {
 			return "User is not found for activation";
 		}
 
-		// Verify if the temporary password matches
-		if (!user.getTempPassword().equals(entity.getPassword())) {
-			return "Invalid temporary password";
+		// Check if account is already active
+		if ("Active".equals(entity.getActiveSw())) {
+			return "User account is already active";
 		}
 
-		// Set the new password (without encoding)
-		entity.setPassword(user.getConfirmPassword());
+		// Set the new password with BCrypt encoding
+		entity.setPassword(passwordEncoder.encode(user.getConfirmPassword()));
 		// Change the user account status to active
 		entity.setActiveSw("Active");
 		// Update the object
@@ -124,8 +126,8 @@ public class UserMgmtServiceImpl implements IUserMgmtService {
 			return "Invalid credentials";
 		}
 
-		// Check if password matches
-		if (!credentials.getPassword().equals(entity.getPassword())) {
+		// Check if password matches using BCrypt
+		if (!passwordEncoder.matches(credentials.getPassword(), entity.getPassword())) {
 			return "Invalid credentials";
 		}
 

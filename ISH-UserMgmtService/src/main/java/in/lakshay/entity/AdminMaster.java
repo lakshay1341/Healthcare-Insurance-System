@@ -1,6 +1,5 @@
 package in.lakshay.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -17,14 +16,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="WORKER_MASTER")
+@Table(name="ADMIN_MASTER")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkerMaster {
+public class AdminMaster {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer workerId;
+    private Integer adminId;
 
     @Column(length = 50)
     private String name;
@@ -35,29 +34,11 @@ public class WorkerMaster {
     @Column(length = 50, unique = true, nullable = false)
     private String email;
 
-    private Long mobileNo;
-
-    private Long ssn;
-
-    @Column(length = 10)
-    private String gender;
-
-    private LocalDate dob;
-
-    @Column(length = 50)
-    private String designation;
-
-    @Column(length = 100)
-    private String helpCenterName;
-
-    @Column(length = 50)
-    private String helpCenterLocation;
-
-    @Column(length = 10)
-    private String activeSw;
-
     @Column(length = 20)
-    private String role = "ROLE_WORKER";
+    private String role = "ROLE_ADMIN";
+
+    @Column(length = 10)
+    private String activeSw = "Active";
 
     // MetaData
     @CreationTimestamp

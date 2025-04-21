@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: ISH-SSA-web-API
+
+# MS port number
+server:
+  port: 9090

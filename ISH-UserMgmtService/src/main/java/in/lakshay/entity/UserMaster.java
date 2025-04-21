@@ -27,7 +27,7 @@ public class UserMaster {
 	private Integer userId;
 	@Column(length = 20)
 	private String  name;
-	@Column(length = 20)
+	@Column(length = 100)
 	private  String password;
 	@Column(length = 30,unique = true,nullable = false)
 	private  String  email;
@@ -38,6 +38,8 @@ public class UserMaster {
 	private  LocalDate  dob;
 	@Column(length = 10)
 	private  String    activeSw;
+	@Column(length = 20)
+	private  String    role = "ROLE_USER";
 
 	//MetaData
 	@CreationTimestamp
